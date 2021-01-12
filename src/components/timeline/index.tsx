@@ -6,7 +6,7 @@ import VaLueLineCanvas from "./vaLueLineCanvas";
 import RangeSelectorCanvas from "./rangeSelectorCanvas";
 
 const zoomLevelConfigurations =  [
-    //[blockOffset, pixelsInSecond] when zoomLevel === 0, each block has an offset of 15 seconds, and each second has a width of 7px.
+    //[blockOffset, pixelsInSecond] when zoomLevel === 0, each block has an offset of 20 seconds, and each second has a width of 7px.
     [20, 7],
     [10, 10],
     [10, 15],

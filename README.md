@@ -14,4 +14,10 @@ A React components collection for media-related features.
 
 Launch the Storybook playground:
 
-### `npm run storybook`
+##### `npm run storybook`
+
+## Test suite collection
+
+Launch the test suite collection:
+
+##### `npm test`
