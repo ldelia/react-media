@@ -1,4 +1,4 @@
-# TimeLine
+# Timeline
 
 <!-- STORY -->
 
@@ -6,16 +6,31 @@
 
 A component for displaying the duration of a media file (mp3, mp4, etc.) and the current reproduction position. It also allows selecting a range for reproduction looping purposes.
 
+## Installation
+
+### NPM
+```
+npm i @bit/ldelia.react-media.timeline
+```
+### YARN
+```
+yarn add @bit/ldelia.react-media.timeline
+```
+### BIT
+```
+bit import ldelia.react-media/timeline
+```
+
 ## Import
 
 ```js
-import { TimeLine } from 'library-name';
+import Timeline from "@bit/ldelia.react-media.timeline";
 ```
 
 ## Usage
 
 ```jsx
-<TimeLine duration={301} value={15} onChange={() => 'Do something'} onRangeChange={() => 'Do something'} />
+<Timeline duration={301} value={15} onChange={() => 'Do something'} onRangeChange={() => 'Do something'} />
 ```
 
 ##### Required props
@@ -38,14 +53,14 @@ import { TimeLine } from 'library-name';
 
 #### Timeline widget
 ``` 
-const StyledTimeLine = styled(TimeLine)`
+const StyledTimeline = styled(Timeline)`
     background-color: green;
 `;
 ``` 
 
 #### Value bar
 ``` 
-const StyledTimeLine = styled(TimeLine)`
+const StyledTimeline = styled(Timeline)`
   .media-timeline-value-line {
     color: red;
   }
@@ -54,7 +69,7 @@ const StyledTimeLine = styled(TimeLine)`
 
 #### Tick-time labels
 ``` 
-const StyledTimeLine = styled(TimeLine)`
+const StyledTimeline = styled(Timeline)`
   .media-timeline-tick-time {
     color: red;
   }
@@ -63,7 +78,7 @@ const StyledTimeLine = styled(TimeLine)`
 
 #### Range selector
 ``` 
-const StyledTimeLine = styled(TimeLine)`
+const StyledTimeline = styled(Timeline)`
   .media-timeline-range-selector-canvas {
     color: red;
   }

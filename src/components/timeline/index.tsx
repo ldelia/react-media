@@ -1,9 +1,9 @@
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import {useEffect, useMemo, useRef} from "react";
-import TickTimeCollectionDisplay from "./tickTimeCollectionDisplay";
-import VaLueLineCanvas from "./vaLueLineCanvas";
-import RangeSelectorCanvas from "./rangeSelectorCanvas";
+import TickTimeCollectionDisplay from "./TickTimeCollectionDisplay";
+import VaLueLineCanvas from "./VaLueLineCanvas";
+import RangeSelectorCanvas from "./RangeSelectorCanvas";
 
 const zoomLevelConfigurations =  [
     //[blockOffset, pixelsInSecond] when zoomLevel === 0, each block has an offset of 20 seconds, and each second has a width of 7px.
@@ -19,7 +19,7 @@ const zoomLevelConfigurations =  [
     [1, 90],
 ];
 
-const TimeLineContainer = styled.div`
+const TimelineContainer = styled.div`
   background-color: #f0f0f0;
   border: 1px solid #c9c9c9;
   height: 80px;
@@ -29,12 +29,12 @@ const TimeLineContainer = styled.div`
   position: relative;
   display: flex;
 `;
-const TimeLineWrapper = styled.div`
+const TimelineWrapper = styled.div`
   position: absolute;
   height: 100%;
 `;
 
-export interface TimeLineProps {
+export interface TimelineProps {
     duration: number;
     value: number;
     zoomLevel?: number;//0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
@@ -53,7 +53,7 @@ export const ZoomContext = React.createContext<ZoomContextType>({
     pixelsInSecond: 0
 });
 
-const TimeLine: React.FC<TimeLineProps> = ({
+const Timeline: React.FC<TimelineProps> = ({
                                                 duration,
                                                 value,
                                                 zoomLevel= 0,
@@ -105,8 +105,8 @@ const TimeLine: React.FC<TimeLineProps> = ({
     }, [value, zoomParams]);
 
     return (
-        <TimeLineContainer ref={timeLineContainerRef} className={className}>
-            <TimeLineWrapper style={{ width: (duration * zoomParams.pixelsInSecond) + 'px' }}>
+        <TimelineContainer ref={timeLineContainerRef} className={className}>
+            <TimelineWrapper style={{ width: (duration * zoomParams.pixelsInSecond) + 'px' }}>
                 <ZoomContext.Provider value={zoomParams}>
                     <VaLueLineCanvas
                         blockStartingTimes={blockStartingTimes}
@@ -121,9 +121,9 @@ const TimeLine: React.FC<TimeLineProps> = ({
                         tickTimes={blockStartingTimes}
                     />
                 </ZoomContext.Provider>
-            </TimeLineWrapper>
-        </TimeLineContainer>
+            </TimelineWrapper>
+        </TimelineContainer>
     );
 };
 
-export default TimeLine;
+export default Timeline;

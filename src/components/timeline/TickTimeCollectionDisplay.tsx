@@ -1,6 +1,6 @@
-import * as React from 'react';
+import React from 'react';
 import styled from "styled-components";
-import TickTime from "./tickTime";
+import TickTime from "./TickTime";
 import {ZoomContext} from "./index";
 
 export interface TickTimeCollectionDisplayProps {

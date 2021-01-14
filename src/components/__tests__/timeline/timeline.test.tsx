@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Timeline, {TimelineProps} from "../../timeline";
 
-import TimeLine, { TimeLineProps } from '.';
 
-describe('TimeLine', () => {
-    let props: TimeLineProps;
+describe('Timeline', () => {
+    let props: TimelineProps;
 
     beforeEach(() => {
         props = {
@@ -19,7 +19,7 @@ describe('TimeLine', () => {
     describe('render()', () => {
         it('renders a timeline', () => {
             const div = document.createElement('div');
-            ReactDOM.render(<TimeLine {...props}/>, div);
+            ReactDOM.render(<Timeline {...props}/>, div);
         });
     });
 });
