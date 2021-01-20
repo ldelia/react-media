@@ -22,6 +22,7 @@ const TickTimeContainer = styled.span.attrs<TickTimeContainerProps>(
   position: absolute;
   padding-left: 8px;
   color: #646464;
+  user-select: none;
   min-width: 20px; 
   max-width: 20px;
   align-self: flex-end;

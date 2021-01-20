@@ -62,7 +62,8 @@ const StyledTimeline = styled(Timeline)`
 ``` 
 const StyledTimeline = styled(Timeline)`
   .media-timeline-value-line {
-    color: red;
+    background-color: red;
+    width: 5px;
   }
 `;
 ``` 
@@ -71,6 +72,15 @@ const StyledTimeline = styled(Timeline)`
 ``` 
 const StyledTimeline = styled(Timeline)`
   .media-timeline-tick-time {
+    color: red;
+  }
+`;
+``` 
+
+#### Tick-time/Value bar container
+``` 
+const StyledTimeline = styled(Timeline)`
+  .media-timeline-value-line-canvas {
     color: red;
   }
 `;

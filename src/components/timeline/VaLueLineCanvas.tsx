@@ -18,9 +18,11 @@ const OverlayCanvas = styled.canvas`
   height: 100%;
   color: #c9c9c9;
 `;
-const FakeValueLine = styled.span`
-  display: none;
-  color: #575757;
+const ValueLine = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  background-color: #575757;
 `;
 
 const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({ blockStartingTimes = [], value}) => {
@@ -48,17 +50,16 @@ const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({ blockStartingTimes = 
         }
     },[blockStartingTimes, zoomContextValue]);
 
-    const showValueLine = useCallback((canvas: HTMLCanvasElement) => {
-        const context: CanvasRenderingContext2D = canvas.getContext('2d')!;
+    const showValueLine = useCallback(() => {
         const linePosition: number = secondsToPixel(zoomContextValue, value);
 
-        const valueLineFakeElement: HTMLElement = valueLineRef.current!;
-
-        context.beginPath();
-        context.moveTo(linePosition,0);
-        context.lineTo(linePosition, context.canvas.height);
-        context.strokeStyle = window.getComputedStyle(valueLineFakeElement).getPropertyValue('color');
-        context.stroke();
+        const valueLineElement: HTMLElement = valueLineRef.current!;
+        const elementWidthCSSProperty: string = window.getComputedStyle(valueLineElement)
+                                        .getPropertyValue('width')
+                                        .replace(/[^-\d]/g, '');
+        const elementWidth: number = parseInt(elementWidthCSSProperty);
+        const linePositionAtValueLineMiddle: number = linePosition - (elementWidth / 2);
+        valueLineElement.style.left = linePositionAtValueLineMiddle + 'px';
 
     },[value, zoomContextValue]);
 
@@ -70,7 +71,7 @@ const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({ blockStartingTimes = 
         canvas.height = canvas.offsetHeight;
 
         showBlocks(canvas);
-        showValueLine(canvas);
+        showValueLine();
 
     }, [showBlocks, showValueLine]);
 
@@ -80,10 +81,10 @@ const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({ blockStartingTimes = 
                 ref={canvasRef}
                 className={'media-timeline-value-line-canvas'}
             />
-            <FakeValueLine
+            <ValueLine
                 ref={valueLineRef}
                 className={'media-timeline-value-line'}>
-            </FakeValueLine>
+            </ValueLine>
         </>
     );
 };
