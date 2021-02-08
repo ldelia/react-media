@@ -148,4 +148,4 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
         />
     );
 };
-export default RangeSelectorCanvas;
+export default React.memo(RangeSelectorCanvas);

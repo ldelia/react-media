@@ -4,20 +4,7 @@ import {useEffect, useMemo, useRef} from "react";
 import TickTimeCollectionDisplay from "./TickTimeCollectionDisplay";
 import VaLueLineCanvas from "./VaLueLineCanvas";
 import RangeSelectorCanvas from "./RangeSelectorCanvas";
-
-const zoomLevelConfigurations =  [
-    //[blockOffset, pixelsInSecond] when zoomLevel === 0, each block has an offset of 20 seconds, and each second has a width of 7px.
-    [20, 7],
-    [10, 10],
-    [10, 15],
-    [5, 20],
-    [5, 25],
-    [2, 35],
-    [2, 50],
-    [1, 60],
-    [1, 75],
-    [1, 90],
-];
+import {zoomLevelConfigurations} from "./constants";
 
 const TimelineContainer = styled.div`
   background-color: #f0f0f0;
