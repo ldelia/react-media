@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import Timeline, { TimelineProps } from '../../timeline';
+import { Timeline, TimelineProps } from '../../timeline';
 
 describe('Timeline', () => {
   let props: TimelineProps;

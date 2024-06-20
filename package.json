@@ -1,6 +1,6 @@
 {
   "name": "@ldelia/react-media",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "A React components collection for media-related features.",
   "private": false,
   "keywords": [
@@ -10,6 +10,8 @@
   "author": "Lisandro Delia",
   "license": "MIT",
   "bugs": "https://github.com/ldelia/react-media/issues",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -20,7 +22,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "tsc",
     "test": "react-scripts test",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
     "eject": "react-scripts eject",

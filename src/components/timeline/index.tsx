@@ -40,7 +40,7 @@ export const ZoomContext = React.createContext<ZoomContextType>({
   pixelsInSecond: 0,
 });
 
-const Timeline: React.FC<TimelineProps> = ({
+export const Timeline: React.FC<TimelineProps> = ({
   duration,
   value,
   zoomLevel = 0,
@@ -121,5 +121,3 @@ const Timeline: React.FC<TimelineProps> = ({
     </TimelineContainer>
   );
 };
-
-export default Timeline;
