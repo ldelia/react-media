@@ -16,8 +16,11 @@ Launch the Storybook playground:
 
 ##### `npm run storybook`
 
+Make sure storybook is already installed by running npx storybook@latest init
+
 ## Test suite collection
 
 Launch the test suite collection:
 
 ##### `npm test`
+ 
