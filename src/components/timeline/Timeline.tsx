@@ -3,8 +3,22 @@ import TickTimeCollectionDisplay from './TickTimeCollectionDisplay';
 import VaLueLineCanvas from './VaLueLineCanvas';
 import RangeSelectorCanvas from './RangeSelectorCanvas';
 import { zoomLevelConfigurations } from './constants';
+import styled from 'styled-components';
 
-import './Timeline.css';
+const TimelineContainer = styled.div`
+  background-color: #f0f0f0;
+  border: 1px solid #c9c9c9;
+  height: 80px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  position: relative;
+  display: flex;
+`;
+const TimelineWrapper = styled.div`
+  position: absolute;
+  height: 100%;
+`;
 
 export interface TimelineProps {
   duration: number; // duration in seconds
@@ -88,12 +102,8 @@ export const Timeline: React.FC<TimelineProps> = ({
   }, [value, zoomParams]);
 
   return (
-    <div
-      ref={timeLineContainerRef}
-      className={`timeline-container ${className}`}
-    >
-      <div
-        className={'timeline-wrapper'}
+    <TimelineContainer ref={timeLineContainerRef} className={className}>
+      <TimelineWrapper
         style={{ width: duration * zoomParams.pixelsInSecond + 'px' }}
       >
         <ZoomContext.Provider value={zoomParams}>
@@ -110,7 +120,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             <TickTimeCollectionDisplay tickTimes={blockStartingTimes} />
           )}
         </ZoomContext.Provider>
-      </div>
-    </div>
+      </TimelineWrapper>
+    </TimelineContainer>
   );
 };
