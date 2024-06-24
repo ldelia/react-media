@@ -4,6 +4,8 @@ import { Timeline, TimelineProps } from '../components/timeline';
 import { Meta, StoryFn } from '@storybook/react';
 import styled from 'styled-components';
 
+import './timeline.stories.custom.css';
+
 const StyledTimeline = styled(Timeline)`
   .media-timeline-value-line {
     background-color: red;
@@ -29,10 +31,27 @@ Default.args = {
   value: 301,
   zoomLevel: 0,
 };
+
 export const WithSelectedRange = Template.bind({});
 WithSelectedRange.args = {
   duration: 305,
   value: 31,
   zoomLevel: 0,
   selectedRange: [20, 30],
+};
+
+export const WithCustomClassName = Template.bind({});
+WithCustomClassName.args = {
+  duration: 305,
+  value: 31,
+  zoomLevel: 0,
+  className: 'this-class-redefines-values',
+};
+
+export const WithOutTimeBlocks = Template.bind({});
+WithOutTimeBlocks.args = {
+  duration: 305,
+  value: 31,
+  zoomLevel: 0,
+  withTimeBlocks: false,
 };

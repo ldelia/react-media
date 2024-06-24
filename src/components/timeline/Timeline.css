@@ -1,0 +1,15 @@
+.timeline-container {
+    background-color: #f0f0f0;
+    border: 1px solid #c9c9c9;
+    height: 80px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    position: relative;
+    display: flex;
+}
+
+.timeline-wrapper {
+    position: absolute;
+    height: 100%;
+}

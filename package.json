@@ -1,6 +1,6 @@
 {
   "name": "@ldelia/react-media",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A React components collection for media-related features.",
   "private": false,
   "keywords": [
@@ -36,7 +36,9 @@
       "plugin:storybook/recommended",
       "prettier"
     ],
-    "plugins": ["prettier"],
+    "plugins": [
+      "prettier"
+    ],
     "rules": {
       "prettier/prettier": "error"
     }
