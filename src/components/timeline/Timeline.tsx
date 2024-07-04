@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import TickTimeCollectionDisplay from './TickTimeCollectionDisplay';
-import VaLueLineCanvas from './VaLueLineCanvas';
-import RangeSelectorCanvas from './RangeSelectorCanvas';
+import TimelineCanvas from './TimelineCanvas/TimelineCanvas';
+import RangeSelectorCanvas from './RangeSelectorCanvas/RangeSelectorCanvas';
 import { zoomLevelConfigurations } from './constants';
 import styled from 'styled-components';
+import { TimelineValue } from './TimelineValue/TimelineValue';
 
 const TimelineContainer = styled.div`
   background-color: #f0f0f0;
@@ -54,6 +54,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   className = '',
 }) => {
   const timeLineContainerRef = useRef(null);
+  const canvasRef = useRef(null);
 
   let zoomLevelValue = zoomLevel ? zoomLevel : 0;
   if (zoomLevelValue < 0 || zoomLevelValue >= zoomLevelConfigurations.length) {
@@ -89,15 +90,6 @@ export const Timeline: React.FC<TimelineProps> = ({
     };
   }, [zoomLevelValue]);
 
-  let blockStartingTimes = [0];
-  const blockCounts: number = Math.ceil(duration / zoomParams.blockOffset);
-  for (let i: number = 1; i < blockCounts; i++) {
-    blockStartingTimes.push(
-      blockStartingTimes[blockStartingTimes.length - 1] +
-        zoomParams.blockOffset,
-    );
-  }
-
   useEffect(() => {
     const timeLineWrapper: HTMLElement = timeLineContainerRef.current!;
     const scrollPosition: number = value * zoomParams.pixelsInSecond - 300;
@@ -110,18 +102,17 @@ export const Timeline: React.FC<TimelineProps> = ({
         style={{ width: duration * zoomParams.pixelsInSecond + 'px' }}
       >
         <ZoomContext.Provider value={zoomParams}>
-          <VaLueLineCanvas
-            blockStartingTimes={withTimeBlocks ? blockStartingTimes : []}
-            value={value}
+          <TimelineCanvas
+            ref={canvasRef}
+            duration={duration}
+            withTimeBlocks={withTimeBlocks}
           />
+          <TimelineValue value={value} canvasRef={canvasRef} />
           <RangeSelectorCanvas
             selectedRange={selectedRange}
             onChange={onChange}
             onRangeChange={onRangeChange}
           />
-          {withTimeBlocks && (
-            <TickTimeCollectionDisplay tickTimes={blockStartingTimes} />
-          )}
         </ZoomContext.Provider>
       </TimelineWrapper>
     </TimelineContainer>

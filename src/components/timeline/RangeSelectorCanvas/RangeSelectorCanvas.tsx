@@ -1,15 +1,7 @@
-import React from 'react';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-
-import { ZoomContext, ZoomContextType } from './index';
-import { useContext, useEffect, useMemo, useRef } from 'react';
-import { pixelToSeconds, secondsToPixel } from './utils/utils';
-
-export interface RangeSelectorCanvasProps {
-  selectedRange: number[];
-  onChange: (value: number) => void;
-  onRangeChange: (value: number[]) => void;
-}
+import { ZoomContext, ZoomContextType } from '../Timeline';
+import { pixelToSeconds, secondsToPixel } from '../utils/utils';
 
 const OverlayCanvas = styled.canvas`
   position: absolute;
@@ -19,6 +11,12 @@ const OverlayCanvas = styled.canvas`
   height: 100%;
   color: cadetblue;
 `;
+
+export interface RangeSelectorCanvasProps {
+  selectedRange: number[];
+  onChange: (value: number) => void;
+  onRangeChange: (value: number[]) => void;
+}
 
 const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
   selectedRange,

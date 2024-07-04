@@ -1,26 +1,11 @@
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-
-import { ZoomContext, ZoomContextType } from './index';
 import {
   getComputedElementWidth,
   numberToPxString,
   secondsToPixel,
-} from './utils/utils';
-
-export interface VaLueLineCanvasProps {
-  blockStartingTimes: number[];
-  value: number;
-}
-
-const OverlayCanvas = styled.canvas`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  color: #c9c9c9;
-`;
+} from '../utils/utils';
+import { ZoomContext, ZoomContextType } from '..';
 
 const PreValueLine = styled.span`
   position: absolute;
@@ -40,44 +25,17 @@ const PostValueLine = styled.span`
   height: 100%;
 `;
 
-const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({
-  blockStartingTimes = [],
-  value,
-}) => {
-  const canvasRef = useRef(null);
+interface Props {
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  value: number;
+}
 
+export const TimelineValue: React.FC<Props> = ({ canvasRef, value }) => {
   const preValueLineRef = useRef(null);
   const valueLineRef = useRef(null);
   const postValueLineRef = useRef(null);
 
   const zoomContextValue: ZoomContextType = useContext(ZoomContext);
-
-  const showBlocks = useCallback(
-    (canvas: HTMLCanvasElement) => {
-      const blockHeight = 20;
-      const context: CanvasRenderingContext2D = canvas.getContext('2d')!;
-
-      for (const blockStartingTime of blockStartingTimes) {
-        const x0Pixel = secondsToPixel(zoomContextValue, blockStartingTime);
-        const x1Pixel = secondsToPixel(
-          zoomContextValue,
-          blockStartingTime + zoomContextValue.blockOffset,
-        );
-
-        context.beginPath();
-        context.moveTo(x0Pixel, canvas.height);
-        context.lineTo(x0Pixel, canvas.height - blockHeight);
-        context.lineTo(x1Pixel, canvas.height - blockHeight);
-        context.lineTo(x1Pixel, canvas.height);
-
-        context.strokeStyle = window
-          .getComputedStyle(canvas)
-          .getPropertyValue('color');
-        context.stroke();
-      }
-    },
-    [blockStartingTimes, zoomContextValue],
-  );
 
   const showValueLine = useCallback(() => {
     const canvas: HTMLCanvasElement = canvasRef.current!;
@@ -107,26 +65,14 @@ const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({
     const postValueLineWidth = canvas.width - postValueLinePosition;
     postValueLineElement.style.left = numberToPxString(postValueLinePosition);
     postValueLineElement.style.width = numberToPxString(postValueLineWidth);
-  }, [value, zoomContextValue]);
+  }, [canvasRef, value, zoomContextValue]);
 
   useEffect(() => {
-    const canvas: HTMLCanvasElement = canvasRef.current!;
-
-    // https://stackoverflow.com/questions/8696631/canvas-drawings-like-lines-are-blurry
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-
-    showBlocks(canvas);
     showValueLine();
-  }, [showBlocks, showValueLine]);
+  }, [showValueLine]);
 
   return (
     <>
-      <OverlayCanvas
-        ref={canvasRef}
-        className={'media-timeline-value-line-canvas'}
-      />
-
       <PreValueLine
         ref={preValueLineRef}
         className={'media-timeline-pre-value-line'}
@@ -139,4 +85,3 @@ const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({
     </>
   );
 };
-export default VaLueLineCanvas;
