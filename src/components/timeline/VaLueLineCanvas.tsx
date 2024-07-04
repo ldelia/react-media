@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import { ZoomContext, ZoomContextType } from './index';
-import { useCallback, useContext, useEffect, useRef } from 'react';
-import { secondsToPixel } from './utils/utils';
+import {
+  getComputedElementWidth,
+  numberToPxString,
+  secondsToPixel,
+} from './utils/utils';
 
 export interface VaLueLineCanvasProps {
   blockStartingTimes: number[];
@@ -18,6 +21,13 @@ const OverlayCanvas = styled.canvas`
   height: 100%;
   color: #c9c9c9;
 `;
+
+const PreValueLine = styled.span`
+  position: absolute;
+  left: 0;
+  height: 100%;
+`;
+
 const ValueLine = styled.span`
   position: absolute;
   width: 1px;
@@ -25,12 +35,21 @@ const ValueLine = styled.span`
   background-color: #575757;
 `;
 
+const PostValueLine = styled.span`
+  position: absolute;
+  height: 100%;
+`;
+
 const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({
   blockStartingTimes = [],
   value,
 }) => {
   const canvasRef = useRef(null);
+
+  const preValueLineRef = useRef(null);
   const valueLineRef = useRef(null);
+  const postValueLineRef = useRef(null);
+
   const zoomContextValue: ZoomContextType = useContext(ZoomContext);
 
   const showBlocks = useCallback(
@@ -61,17 +80,33 @@ const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({
   );
 
   const showValueLine = useCallback(() => {
-    const linePosition: number = secondsToPixel(zoomContextValue, value);
+    const canvas: HTMLCanvasElement = canvasRef.current!;
 
+    const preValueLineElement: HTMLElement = preValueLineRef.current!;
     const valueLineElement: HTMLElement = valueLineRef.current!;
-    const elementWidthCSSProperty: string = window
-      .getComputedStyle(valueLineElement)
-      .getPropertyValue('width')
-      .replace(/[^-\d]/g, '');
-    const elementWidth: number = parseInt(elementWidthCSSProperty);
-    const linePositionAtValueLineMiddle: number =
-      linePosition - elementWidth / 2;
-    valueLineElement.style.left = linePositionAtValueLineMiddle + 'px';
+    const postValueLineElement: HTMLElement = postValueLineRef.current!;
+
+    const valueLineWidth: number = getComputedElementWidth(valueLineElement);
+    const linePosition: number = secondsToPixel(zoomContextValue, value);
+    const valueLinePositionBeginningConsideringWidth: number =
+      linePosition - valueLineWidth / 2;
+
+    // configure preValueLineElement
+    preValueLineElement.style.width = numberToPxString(
+      valueLinePositionBeginningConsideringWidth,
+    );
+
+    // configure valueLineElement
+    valueLineElement.style.left = numberToPxString(
+      valueLinePositionBeginningConsideringWidth,
+    );
+
+    // configure postValueLineElement
+    const postValueLinePosition =
+      valueLinePositionBeginningConsideringWidth + valueLineWidth;
+    const postValueLineWidth = canvas.width - postValueLinePosition;
+    postValueLineElement.style.left = numberToPxString(postValueLinePosition);
+    postValueLineElement.style.width = numberToPxString(postValueLineWidth);
   }, [value, zoomContextValue]);
 
   useEffect(() => {
@@ -91,10 +126,16 @@ const VaLueLineCanvas: React.FC<VaLueLineCanvasProps> = ({
         ref={canvasRef}
         className={'media-timeline-value-line-canvas'}
       />
-      <ValueLine
-        ref={valueLineRef}
-        className={'media-timeline-value-line'}
-      ></ValueLine>
+
+      <PreValueLine
+        ref={preValueLineRef}
+        className={'media-timeline-pre-value-line'}
+      />
+      <ValueLine ref={valueLineRef} className={'media-timeline-value-line'} />
+      <PostValueLine
+        ref={postValueLineRef}
+        className={'media-timeline-post-value-line'}
+      />
     </>
   );
 };

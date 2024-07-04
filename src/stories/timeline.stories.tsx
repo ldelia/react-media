@@ -45,13 +45,22 @@ WithCustomClassName.args = {
   duration: 305,
   value: 31,
   zoomLevel: 0,
-  className: 'this-class-redefines-values',
+  className: 'this-class-redefines-styles',
 };
 
-export const WithOutTimeBlocks = Template.bind({});
-WithOutTimeBlocks.args = {
+export const WithoutTimeBlocks = Template.bind({});
+WithoutTimeBlocks.args = {
   duration: 305,
   value: 31,
   zoomLevel: 0,
   withTimeBlocks: false,
+};
+
+export const Minimalist = Template.bind({});
+Minimalist.args = {
+  duration: 305,
+  value: 31,
+  zoomLevel: 0,
+  withTimeBlocks: false,
+  className: 'minimalist',
 };

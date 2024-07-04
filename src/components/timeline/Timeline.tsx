@@ -18,6 +18,9 @@ const TimelineContainer = styled.div`
 const TimelineWrapper = styled.div`
   position: absolute;
   height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 `;
 
 export interface TimelineProps {
