@@ -1,4 +1,4 @@
-import { ZoomContextType } from '../index';
+import { ZoomContextType } from '../ZoomContext/ZoomContext';
 
 export const secondsToPixel = (
   zoomContextValue: ZoomContextType,

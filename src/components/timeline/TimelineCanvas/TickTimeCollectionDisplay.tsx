@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import TickTime from './TickTime';
-import { ZoomContext } from '../index';
+import { ZoomContext } from '../ZoomContext/ZoomContext';
 
 export interface TickTimeCollectionDisplayProps {
   tickTimes: number[];

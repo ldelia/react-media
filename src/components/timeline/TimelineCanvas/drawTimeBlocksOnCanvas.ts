@@ -1,5 +1,5 @@
 import { secondsToPixel } from '../utils/utils';
-import { ZoomContextType } from '../Timeline';
+import { ZoomContextType } from '../ZoomContext/ZoomContext';
 
 export const drawTimeBlocksOnCanvas = (
   canvas: HTMLCanvasElement,

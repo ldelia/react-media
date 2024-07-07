@@ -4,6 +4,7 @@ import RangeSelectorCanvas from './RangeSelectorCanvas/RangeSelectorCanvas';
 import { zoomLevelConfigurations } from './constants';
 import styled from 'styled-components';
 import { TimelineValue } from './TimelineValue/TimelineValue';
+import { ZoomContext, ZoomContextType } from './ZoomContext/ZoomContext';
 
 const TimelineContainer = styled.div`
   background-color: #f0f0f0;
@@ -33,15 +34,6 @@ export interface TimelineProps {
   onChange?: (value: number) => void;
   onRangeChange?: (value: number[]) => void;
 }
-
-export type ZoomContextType = {
-  blockOffset: number;
-  pixelsInSecond: number;
-};
-export const ZoomContext = React.createContext<ZoomContextType>({
-  blockOffset: 0,
-  pixelsInSecond: 0,
-});
 
 export const Timeline: React.FC<TimelineProps> = ({
   duration,
@@ -83,25 +75,27 @@ export const Timeline: React.FC<TimelineProps> = ({
     console.warn('The selected range is inconsistent.');
   }
 
-  const zoomParams = useMemo(() => {
+  const zoomContextValue = useMemo<ZoomContextType>(() => {
     return {
       blockOffset: zoomLevelConfigurations[zoomLevelValue][0],
       pixelsInSecond: zoomLevelConfigurations[zoomLevelValue][1],
+      //secondsPerPixel: 1 / zoomLevelConfigurations[zoomLevelValue][1],
     };
   }, [zoomLevelValue]);
 
   useEffect(() => {
     const timeLineWrapper: HTMLElement = timeLineContainerRef.current!;
-    const scrollPosition: number = value * zoomParams.pixelsInSecond - 300;
+    const scrollPosition: number =
+      value * zoomContextValue.pixelsInSecond - 300;
     timeLineWrapper.scrollLeft = Math.max(0, scrollPosition);
-  }, [value, zoomParams]);
+  }, [value, zoomContextValue]);
 
   return (
     <TimelineContainer ref={timeLineContainerRef} className={className}>
       <TimelineWrapper
-        style={{ width: duration * zoomParams.pixelsInSecond + 'px' }}
+        style={{ width: duration * zoomContextValue.pixelsInSecond + 'px' }}
       >
-        <ZoomContext.Provider value={zoomParams}>
+        <ZoomContext.Provider value={zoomContextValue}>
           <TimelineCanvas
             ref={canvasRef}
             duration={duration}

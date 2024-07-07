@@ -5,7 +5,7 @@ import {
   numberToPxString,
   secondsToPixel,
 } from '../utils/utils';
-import { ZoomContext, ZoomContextType } from '..';
+import { ZoomContext, ZoomContextType } from '../ZoomContext/ZoomContext';
 
 const PreValueLine = styled.span`
   position: absolute;

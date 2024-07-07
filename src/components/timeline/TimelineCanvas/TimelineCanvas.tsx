@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { ZoomContext, ZoomContextType } from '../Timeline';
+import { ZoomContext, ZoomContextType } from '../ZoomContext/ZoomContext';
 import TickTimeCollectionDisplay from './TickTimeCollectionDisplay';
 import { drawTimeBlocksOnCanvas } from './drawTimeBlocksOnCanvas';
 

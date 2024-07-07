@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-import { ZoomContext, ZoomContextType } from '../Timeline';
+import { ZoomContext, ZoomContextType } from '../ZoomContext/ZoomContext';
 import { pixelToSeconds, secondsToPixel } from '../utils/utils';
 
 const OverlayCanvas = styled.canvas`
