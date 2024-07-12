@@ -3,10 +3,8 @@ import React from 'react';
 export type ZoomContextType = {
   blockOffset: number;
   pixelsInSecond: number;
-  //secondsPerPixel: number;
+  timelineWrapperWidth: number;
 };
-export const ZoomContext = React.createContext<ZoomContextType>({
-  blockOffset: 0,
-  pixelsInSecond: 0,
-  //secondsPerPixel: 0,
-});
+export const ZoomContext = React.createContext<ZoomContextType>(
+  null as unknown as ZoomContextType,
+);

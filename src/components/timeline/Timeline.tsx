@@ -1,10 +1,15 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TimelineCanvas from './TimelineCanvas/TimelineCanvas';
 import RangeSelectorCanvas from './RangeSelectorCanvas/RangeSelectorCanvas';
 import { zoomLevelConfigurations } from './constants';
 import styled from 'styled-components';
 import { TimelineValue } from './TimelineValue/TimelineValue';
 import { ZoomContext, ZoomContextType } from './ZoomContext/ZoomContext';
+import {
+  getBlockOffsetForZoomLevel,
+  getTimelineWrapperWidth,
+  numberToPxString,
+} from './utils/utils';
 
 const TimelineContainer = styled.div`
   background-color: #f0f0f0;
@@ -22,6 +27,7 @@ const TimelineWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  overflow: hidden;
 `;
 
 export interface TimelineProps {
@@ -45,8 +51,14 @@ export const Timeline: React.FC<TimelineProps> = ({
   onRangeChange = () => {},
   className = '',
 }) => {
-  const timeLineContainerRef = useRef(null);
+  const timeLineContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef(null);
+
+  const [zoomContextValue, setZoomContextValue] = useState<ZoomContextType>({
+    blockOffset: 0,
+    pixelsInSecond: 0,
+    timelineWrapperWidth: 0,
+  });
 
   let zoomLevelValue = zoomLevel ? zoomLevel : 0;
   if (zoomLevelValue < 0 || zoomLevelValue >= zoomLevelConfigurations.length) {
@@ -75,25 +87,38 @@ export const Timeline: React.FC<TimelineProps> = ({
     console.warn('The selected range is inconsistent.');
   }
 
-  const zoomContextValue = useMemo<ZoomContextType>(() => {
-    return {
-      blockOffset: zoomLevelConfigurations[zoomLevelValue][0],
-      pixelsInSecond: zoomLevelConfigurations[zoomLevelValue][1],
-      //secondsPerPixel: 1 / zoomLevelConfigurations[zoomLevelValue][1],
-    };
-  }, [zoomLevelValue]);
+  useEffect(() => {
+    if (!timeLineContainerRef.current) return;
+
+    const timelineWrapperWidth = getTimelineWrapperWidth(
+      timeLineContainerRef.current.offsetWidth,
+      zoomLevelValue,
+    );
+
+    setZoomContextValue({
+      blockOffset: getBlockOffsetForZoomLevel(
+        zoomLevelValue,
+        duration,
+        timelineWrapperWidth,
+      ),
+      pixelsInSecond: timelineWrapperWidth / duration,
+      timelineWrapperWidth: timelineWrapperWidth,
+    });
+  }, [timeLineContainerRef.current, zoomLevelValue, duration]);
 
   useEffect(() => {
     const timeLineWrapper: HTMLElement = timeLineContainerRef.current!;
     const scrollPosition: number =
       value * zoomContextValue.pixelsInSecond - 300;
     timeLineWrapper.scrollLeft = Math.max(0, scrollPosition);
-  }, [value, zoomContextValue]);
+  }, [duration, value, zoomContextValue]);
 
   return (
     <TimelineContainer ref={timeLineContainerRef} className={className}>
       <TimelineWrapper
-        style={{ width: duration * zoomContextValue.pixelsInSecond + 'px' }}
+        style={{
+          width: numberToPxString(zoomContextValue.timelineWrapperWidth),
+        }}
       >
         <ZoomContext.Provider value={zoomContextValue}>
           <TimelineCanvas

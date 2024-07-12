@@ -6,7 +6,6 @@ import React, {
   useRef,
 } from 'react';
 import styled from 'styled-components';
-
 import { ZoomContext, ZoomContextType } from '../ZoomContext/ZoomContext';
 import TickTimeCollectionDisplay from './TickTimeCollectionDisplay';
 import { drawTimeBlocksOnCanvas } from './drawTimeBlocksOnCanvas';
@@ -32,18 +31,18 @@ const TimelineCanvas = forwardRef<HTMLCanvasElement, VaLueLineCanvasProps>(
     const zoomContextValue: ZoomContextType = useContext(ZoomContext);
 
     const blockStartingTimes = (() => {
-      if (!withTimeBlocks) return [];
+      if (!withTimeBlocks || !zoomContextValue.blockOffset) return [];
 
       let blockStartingTimes = [0];
-      const blockCounts: number = Math.ceil(
-        duration / zoomContextValue.blockOffset,
-      );
-      for (let i: number = 1; i < blockCounts; i++) {
+      let secondsToCover = duration;
+      while (secondsToCover > 0) {
         blockStartingTimes.push(
           blockStartingTimes[blockStartingTimes.length - 1] +
             zoomContextValue.blockOffset,
         );
+        secondsToCover = secondsToCover - zoomContextValue.blockOffset;
       }
+      blockStartingTimes.splice(-1);
       return blockStartingTimes;
     })();
 

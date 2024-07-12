@@ -3,16 +3,16 @@ import styled from 'styled-components';
 import TickTime from './TickTime';
 import { ZoomContext } from '../ZoomContext/ZoomContext';
 
-export interface TickTimeCollectionDisplayProps {
-  tickTimes: number[];
-}
-
 const TickTimeCollectionDisplayContainer = styled.div`
   position: absolute;
   display: flex;
   align-self: flex-end;
   height: 100%;
 `;
+
+export interface TickTimeCollectionDisplayProps {
+  tickTimes: number[];
+}
 
 const TickTimeCollectionDisplay: React.FC<TickTimeCollectionDisplayProps> = ({
   tickTimes = [],
