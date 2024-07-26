@@ -5,10 +5,7 @@ A React components collection for media-related features.
 ## Available Components
 
 - Timeline ([Docs](./src/components/timeline/README.md))
-
-## In Progress
-
-- Audio/Video player
+- ReproductionWidget ([Docs](./src/components/reproduction-widget/README.md))
 
 ## Storybook
 
