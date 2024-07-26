@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "outDir": "./dist",             // Directory to output compiled files
+    "rootDir": "./src",             // Root directory of input files
     "target": "ES6",
     "module": "ESNext",
     "jsx": "react",
@@ -8,7 +10,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,            // Generate .d.ts files
+    "declarationDir": "./dist"      // Directory to output .d.ts files
   },
   "include": ["src", ".storybook", "src/react-docgen-types.d.ts"]
 }
