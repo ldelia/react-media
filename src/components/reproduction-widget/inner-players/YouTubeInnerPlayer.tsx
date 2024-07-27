@@ -6,7 +6,7 @@ interface Props {
   onReady: (event: { target: InnerYouTubePlayer }) => void;
 }
 export const YouTubeInnerPlayer = ({ videoId, onReady }: Props) => {
-  const [origin, setOrigin] = useState('');
+  const [origin, setOrigin] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -24,13 +24,21 @@ export const YouTubeInnerPlayer = ({ videoId, onReady }: Props) => {
       origin: origin,
     },
   };
+
+  if (origin === null) {
+    return null;
+  }
+
   return (
     <YouTube
       id={'YT-' + videoId}
       className='youtube-player'
       videoId={videoId}
       opts={opts}
-      onReady={onReady}
+      onReady={(event) => {
+        console.log("on ready");
+        onReady(event);
+      }}
     />
   );
 };

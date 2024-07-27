@@ -22,6 +22,8 @@ const EVENTS = {
   FINISH: 'FINISH',
 } as const;
 
+type Handler = (args: object) => void;
+
 const dispatchOnReadyHandlers = Symbol();
 const dispatchOnSongStartHandlers = Symbol();
 const dispatchOnCountingInHandlers = Symbol();
@@ -39,13 +41,13 @@ export class Reproduction {
   private ready: boolean;
   private interval: ReturnType<typeof setInterval> | null;
   private countingInCounter: number;
-  private [dispatchOnReadyHandlers]: (() => void)[];
-  private [dispatchOnSongStartHandlers]: (() => void)[];
-  private [dispatchOnCountingInHandlers]: (() => void)[];
-  private [dispatchOnPlayHandlers]: (() => void)[];
-  private [dispatchOnPlayingHandlers]: (() => void)[];
-  private [dispatchOnPausedHandlers]: (() => void)[];
-  private [dispatchOnFinishHandlers]: (() => void)[];
+  private [dispatchOnReadyHandlers]: Handler[];
+  private [dispatchOnSongStartHandlers]: Handler[];
+  private [dispatchOnCountingInHandlers]: Handler[];
+  private [dispatchOnPlayHandlers]: Handler[];
+  private [dispatchOnPlayingHandlers]: Handler[];
+  private [dispatchOnPausedHandlers]: Handler[];
+  private [dispatchOnFinishHandlers]: Handler[];
 
   static get EVENTS() {
     return EVENTS;
@@ -86,7 +88,7 @@ export class Reproduction {
     });
   }
 
-  on(eventName: keyof typeof Reproduction.EVENTS, handler: () => void) {
+  on(eventName: keyof typeof Reproduction.EVENTS, handler: Handler) {
     switch (eventName) {
       case Reproduction.EVENTS.READY:
         return this[dispatchOnReadyHandlers].push(handler);
@@ -107,10 +109,10 @@ export class Reproduction {
     }
   }
 
-  dispatch(eventName: keyof typeof Reproduction.EVENTS) {
+  dispatch(eventName: keyof typeof Reproduction.EVENTS, args = {}) {
     let handler, i, len;
 
-    let ref: (() => void)[] = [];
+    let ref: Handler[] = [];
 
     switch (eventName) {
       case Reproduction.EVENTS.READY:
@@ -140,15 +142,15 @@ export class Reproduction {
 
     for (i = 0, len = ref.length; i < len; i++) {
       handler = ref[i];
-      handler();
+      handler(args);
       // setTimeout(handler, 0);
     }
   }
 
   private countIn(timeout: number, limit: number) {
-    // the initial count starts instantly, no waiting
+    // the initial count starts instantly, no need to wait
     this.countingInCounter++;
-    this.dispatch(Reproduction.EVENTS.COUNTING_IN);
+    this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
 
     const interval = setInterval(() => {
       this.countingInCounter++;
@@ -161,7 +163,7 @@ export class Reproduction {
           this.play();
         }
       } else {
-        this.dispatch(Reproduction.EVENTS.COUNTING_IN);
+        this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
       }
     }, timeout);
   }
