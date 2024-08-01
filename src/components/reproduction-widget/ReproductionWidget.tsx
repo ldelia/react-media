@@ -6,6 +6,7 @@ import { YouTubePlayer as InnerYouTubePlayer } from 'react-youtube';
 
 interface BaseProps {
   trainingMode: boolean;
+  songTempo?: number;
   onInit: (reproduction: Reproduction) => void;
 }
 
@@ -24,18 +25,17 @@ export type ReproductionWidgetProps = TrainingProps | NonTrainingProps;
 export const ReproductionWidget = ({
   trainingMode,
   videoId,
+  songTempo = 0,
   onInit,
 }: ReproductionWidgetProps) => {
   const DURATION_TO_TEST = 30;
-  const TEMPO_TO_TEST = 90;
-  const WITH_COUNTING_IN_TEST = true;
 
   function onPlayAlongInnerPlayerReadyHandler(event: { target: string }) {
     let newReproduction = Reproduction.newBuilder()
       .withTrainingMode(false)
       .withSongDuration(DURATION_TO_TEST)
-      .withSongTempo(TEMPO_TO_TEST)
-      .withCountingIn(WITH_COUNTING_IN_TEST)
+      .withSongTempo(songTempo)
+      .withCountingIn(songTempo > 0)
       .withInnerPlayer(event.target)
       .createReproduction();
     onInit(newReproduction);
@@ -46,8 +46,8 @@ export const ReproductionWidget = ({
   }) {
     let newReproduction = Reproduction.newBuilder()
       .withTrainingMode(true)
-      .withSongTempo(TEMPO_TO_TEST)
-      .withCountingIn(WITH_COUNTING_IN_TEST)
+      .withSongTempo(songTempo)
+      .withCountingIn(songTempo > 0)
       .withInnerPlayer(event.target)
       .createReproduction();
     onInit(newReproduction);

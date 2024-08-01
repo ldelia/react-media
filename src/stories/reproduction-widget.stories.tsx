@@ -19,6 +19,7 @@ export const Default = Template.bind({});
 Default.args = {
   trainingMode: true,
   videoId: 'jFI-RBqXzhU',
+  songTempo: 180,
   onInit: (reproduction) => {
     console.log("on init")
     reproduction.on('COUNTING_IN', (args) => { console.log("counting in", args) });
