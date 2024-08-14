@@ -1,43 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import YouTube, { YouTubePlayer as InnerYouTubePlayer } from 'react-youtube';
+import React from 'react';
+import { InnerYouTubePlayerInterface } from '../models/Player/YouTubePlayer';
+import ReactPlayer from 'react-player/lazy';
 
 interface Props {
   videoId: string;
-  onReady: (event: { target: InnerYouTubePlayer }) => void;
+  onReady: (event: { target: InnerYouTubePlayerInterface }) => void;
 }
 export const YouTubeInnerPlayer = ({ videoId, onReady }: Props) => {
-  const [origin, setOrigin] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOrigin(window.location.href);
-    }
-  }, []);
-
-  const opts = {
-    playerVars: {
-      // https://developers.google.com/youtube/player_parameters
-      autoplay: 0,
-      controls: 0,
-      showinfo: 0,
-      enablejsapi: 1,
-      origin: origin,
-    },
-  };
-
-  if (origin === null) {
-    return null;
-  }
-
-  console.log(videoId, opts)
-
   return (
-    <YouTube
-      id={'YT-' + videoId}
-      className='youtube-player'
-      videoId={videoId}
-      opts={opts}
-      onReady={onReady}
-    />
+    <ReactPlayer url={`https://www.youtube.com/watch?v=${videoId}`} onReady={(event) => onReady({ target: event.getInternalPlayer() as InnerYouTubePlayerInterface })} />
   );
 };

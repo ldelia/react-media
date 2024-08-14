@@ -1,14 +1,14 @@
 import { YouTubePlayer } from './Player/YouTubePlayer';
 import { PlayAlongPlayer } from './Player/PlayAlongPlayer';
 import { Reproduction } from './Reproduction';
-import { YouTubePlayer as InnerYouTubePlayer } from 'react-youtube';
+import { InnerYouTubePlayerInterface } from './Player/YouTubePlayer';
 
 export class ReproductionBuilder {
   private trainingMode: boolean;
   private requiresCountingIn: boolean;
   private songDuration: number | null;
   private songTempo: number | null;
-  private innerPlayer: InnerYouTubePlayer | string;
+  private innerPlayer: InnerYouTubePlayerInterface | string | null;
 
   constructor() {
     this.trainingMode = false;
@@ -38,7 +38,7 @@ export class ReproductionBuilder {
     return this;
   }
 
-  withInnerPlayer(innerPlayer: InnerYouTubePlayer | string) {
+  withInnerPlayer(innerPlayer: InnerYouTubePlayerInterface | string) {
     this.innerPlayer = innerPlayer;
     return this;
   }
@@ -54,12 +54,12 @@ export class ReproductionBuilder {
 
     let player;
     if (this.trainingMode) {
-      player = new YouTubePlayer(this.innerPlayer);
+      player = new YouTubePlayer(this.innerPlayer as InnerYouTubePlayerInterface);
     } else {
       if (this.songDuration === null) {
         throw new Error('The song duration is mandatory');
       }
-      player = new PlayAlongPlayer(this.songDuration, this.innerPlayer);
+      player = new PlayAlongPlayer(this.songDuration, this.innerPlayer as string);
     }
     return new Reproduction(
       player,

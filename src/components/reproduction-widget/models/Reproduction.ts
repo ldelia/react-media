@@ -147,7 +147,7 @@ export class Reproduction {
     }
   }
 
-  private countIn(timeout: number, limit: number) {
+  private countInAndPlay(timeout: number, limit: number) {
     // the initial count starts instantly, no need to wait
     this.countingInCounter++;
     this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
@@ -158,7 +158,7 @@ export class Reproduction {
         clearInterval(interval);
         this.countingInCounter = 0;
         if (limit !== 5) {
-          this.countIn(this.getBPMInterval(), 5);
+          this.countInAndPlay(this.getBPMInterval(), 5);
         } else {
           this.play();
         }
@@ -175,7 +175,7 @@ export class Reproduction {
 
     if (this.requiresCountingIn && this.getCurrentTime() === 0) {
       this.state = Reproduction.STATES.COUNTING_IN;
-      this.countIn(this.getBPMInterval() * 2, 3);
+      this.countInAndPlay(this.getBPMInterval() * 2, 3);
     } else {
       this.play();
     }

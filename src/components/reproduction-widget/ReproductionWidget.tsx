@@ -2,7 +2,7 @@ import React from 'react';
 import { YouTubeInnerPlayer } from './inner-players/YouTubeInnerPlayer';
 import { PlayAlongInnerPlayer } from './inner-players/PlayAlongInnerPlayer';
 import { Reproduction } from './models/Reproduction';
-import { YouTubePlayer as InnerYouTubePlayer } from 'react-youtube';
+import { InnerYouTubePlayerInterface } from './models/Player/YouTubePlayer';
 
 interface BaseProps {
   trainingMode: boolean;
@@ -44,7 +44,7 @@ export const ReproductionWidget = ({
   }
 
   function onYouTubeInnerPlayerReadyHandler(event: {
-    target: InnerYouTubePlayer;
+    target: InnerYouTubePlayerInterface;
   }) {
     let newReproduction = Reproduction.newBuilder()
       .withTrainingMode(true)

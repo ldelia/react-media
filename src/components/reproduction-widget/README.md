@@ -24,6 +24,7 @@ Currently, it supports YouTube videos and a silent mode, meaning a reproduction 
 |----------------|------------|-------------------------------------------------------------------------------------|
 | `trainingMode` | `boolean`  | If true, will reproduce the video with youtube, otherwise, silent mode will be used |
 | `videoId`      | `string`   | YouTube video id (required if trainingMode === true)                                |
+| `duration`     | `number`   | Song duration (required if trainingMode === false)                                  |
 | `onInit`       | `function` | Fired when the reproduction is ready to use                                         |   
 
 ##### Optional props

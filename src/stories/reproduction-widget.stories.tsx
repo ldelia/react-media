@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Meta, StoryFn } from '@storybook/react';
-import { ReproductionWidget, ReproductionWidgetProps } from '../components/reproduction-widget';
+import { Reproduction, ReproductionWidget, ReproductionWidgetProps } from '../components/reproduction-widget';
 
 export default {
   title: 'ReproductionWidget',
@@ -10,19 +10,64 @@ export default {
   },
 } as Meta;
 
-const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProps) => (
-  <ReproductionWidget
-    {...args}
-  />
-);
+const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProps) => {
+  const [reproduction, setReproduction] = useState<Reproduction | null>(null);
+  const [reproductionTimestamp, setReproductionTimestamp] = useState(0);
+
+  // Handle initialization of reproduction
+  const handleInit = useCallback((reproductionInstance: Reproduction) => {
+    const refreshEvent =(args: any) => { setReproductionTimestamp(new Date().getTime()) };
+
+    setReproduction(reproductionInstance);
+    reproductionInstance.on('COUNTING_IN', (args: any) => { console.log("counting in", args) });
+    reproductionInstance.on('PLAYING', refreshEvent);
+    reproductionInstance.on('PAUSED', refreshEvent);
+    reproductionInstance.on('FINISH', refreshEvent);
+    reproductionInstance.start();
+  }, []);
+
+  const handleStop = () => {
+    if (reproduction) {
+      reproduction.stop();
+    }
+  };
+
+  const handlePause = () => {
+    if (reproduction) {
+      reproduction.pause();
+    }
+  };
+
+  const handleResume = () => {
+    if (reproduction) {
+      reproduction.play();
+    }
+  };
+
+  return (
+    <div>
+      <ReproductionWidget
+        {...args}
+        onInit={handleInit}
+      />
+      <div>
+        <button onClick={handleStop} disabled={!reproduction || reproduction.isStopped()}>
+          Stop
+        </button>
+        <button onClick={handlePause} disabled={!reproduction || !reproduction.isPlaying()}>
+          Pause
+        </button>
+        <button onClick={handleResume} disabled={!reproduction || reproduction.isPlaying()}>
+          Resume
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const Default = Template.bind({});
 Default.args = {
   trainingMode: true,
   videoId: 'jFI-RBqXzhU',
   songTempo: 180,
-  onInit: (reproduction) => {
-    console.log("on init")
-    reproduction.on('COUNTING_IN', (args) => { console.log("counting in", args) });
-    reproduction.start();
-  }
 };

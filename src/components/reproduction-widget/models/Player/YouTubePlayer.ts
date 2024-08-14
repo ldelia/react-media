@@ -1,20 +1,7 @@
-import { YouTubePlayer as InnerYouTubePlayer } from 'react-youtube';
 import { PlayAlongPlayer } from './PlayAlongPlayer';
 import { PLAYER_EVENTS } from './PlayerEvents';
 
-// https://developers.google.com/youtube/iframe_api_reference
-enum INNER_YOUTUBE_PLAYER_EVENTS {
-  VIDEO_UNSTARTED = -1,
-  VIDEO_ENDED = 0,
-  VIDEO_PLAYING = 1,
-  VIDEO_PAUSED = 2,
-  VIDEO_BUFFERING = 3,
-  VIDEO_CUED = 5,
-}
-
-interface INNER_YOUTUBE_PLAYER_StateChangeEvent {
-  data: INNER_YOUTUBE_PLAYER_EVENTS;
-}
+export type InnerYouTubePlayerInterface = YT.Player;
 
 const dispatchOnReadyHandlers = Symbol();
 const dispatchOnFinishHandlers = Symbol();
@@ -22,7 +9,7 @@ const dispatchOnFinishHandlers = Symbol();
 export class YouTubePlayer {
   private currentTime: number;
   private isRunning: boolean;
-  private innerPlayer: InnerYouTubePlayer | number;
+  private innerPlayer: InnerYouTubePlayerInterface;
   private [dispatchOnReadyHandlers]: (() => void)[];
   private [dispatchOnFinishHandlers]: (() => void)[];
 
@@ -30,17 +17,14 @@ export class YouTubePlayer {
     return PLAYER_EVENTS;
   }
 
-  constructor(innerPlayer: InnerYouTubePlayer) {
+  constructor(innerPlayer: InnerYouTubePlayerInterface) {
     this[dispatchOnFinishHandlers] = [];
     this[dispatchOnReadyHandlers] = [];
 
     this.currentTime = 0;
     this.isRunning = false;
 
-    this.setInnerPlayer(innerPlayer);
-  }
-
-  private setInnerPlayer(innerPlayer: InnerYouTubePlayer) {
+    this.innerPlayer = innerPlayer;
     this.innerPlayer = innerPlayer;
     this.dispatch(YouTubePlayer.EVENTS.READY);
 
@@ -51,9 +35,9 @@ export class YouTubePlayer {
 
     this.innerPlayer.addEventListener(
       'onStateChange',
-      (videoState: INNER_YOUTUBE_PLAYER_StateChangeEvent) => {
+      (videoState: YT. OnStateChangeEvent) => {
         switch (videoState.data) {
-          case INNER_YOUTUBE_PLAYER_EVENTS.VIDEO_ENDED:
+          case YT. PlayerState.ENDED:
             this.dispatch(YouTubePlayer.EVENTS.FINISH);
             this.isRunning = false;
             this.currentTime = 0;
@@ -101,7 +85,7 @@ export class YouTubePlayer {
     const videoPlayer = this.getInnerPlayer();
     this.currentTime = seconds;
 
-    videoPlayer.seekTo(this.currentTime);
+    videoPlayer.seekTo(this.currentTime, true);
 
     if (this.isRunning) {
       this.play();
