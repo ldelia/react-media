@@ -12,11 +12,13 @@ interface BaseProps {
 
 interface TrainingProps extends BaseProps {
   trainingMode: true;
+  duration?: never;
   videoId: string;
 }
 
 interface NonTrainingProps extends BaseProps {
   trainingMode: false;
+  duration: number;
   videoId?: never;
 }
 
@@ -24,16 +26,16 @@ export type ReproductionWidgetProps = TrainingProps | NonTrainingProps;
 
 export const ReproductionWidget = ({
   trainingMode,
+  duration,
   videoId,
   songTempo = 0,
   onInit,
 }: ReproductionWidgetProps) => {
-  const DURATION_TO_TEST = 30;
 
   function onPlayAlongInnerPlayerReadyHandler(event: { target: string }) {
     let newReproduction = Reproduction.newBuilder()
       .withTrainingMode(false)
-      .withSongDuration(DURATION_TO_TEST)
+      .withSongDuration(duration!)
       .withSongTempo(songTempo)
       .withCountingIn(songTempo > 0)
       .withInnerPlayer(event.target)

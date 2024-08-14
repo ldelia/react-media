@@ -64,3 +64,12 @@ Minimalist.args = {
   withTimeBlocks: false,
   className: 'minimalist',
 };
+
+export const WithSelectedRangeAndMarkers = Template.bind({});
+WithSelectedRangeAndMarkers.args = {
+  duration: 305,
+  value: 31,
+  zoomLevel: 0,
+  selectedRange: [20, 30],
+  markers: [90,108],
+};

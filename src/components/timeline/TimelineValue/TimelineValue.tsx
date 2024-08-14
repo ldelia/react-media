@@ -18,6 +18,7 @@ const ValueLine = styled.span`
   width: 1px;
   height: 100%;
   background-color: #575757;
+  z-index: 1; // force the ValueLine to be on top of the Markers
 `;
 
 const PostValueLine = styled.span`

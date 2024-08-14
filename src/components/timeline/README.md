@@ -53,11 +53,12 @@ import Timeline from '@bit/ldelia.react-media.timeline';
 ##### Optional props
 
 | Name            | Type       | Default    | Description                                        |
-| --------------- | ---------- | ---------- | -------------------------------------------------- |
+|-----------------| ---------- | ---------- |----------------------------------------------------|
 | `onChange`      | `function` | `() => {}` | Fired when the user double-clicks on the timeline  |
 | `onRangeChange` | `function` | `() => {}` | Fired when the user select a range in the timeline |
 | `selectedRange` | `array`    | `[]`       | The current selected range                         |
-| `zoomLevel`     | `number`   | `0`        | `The current timeline zoom level`                  |
+| `zoomLevel`     | `number`   | `0`        | The current timeline zoom level                    |
+| `markers`       | `array`    | `[]`       | Markers on the timeline                            |
 
 ## Customization
 

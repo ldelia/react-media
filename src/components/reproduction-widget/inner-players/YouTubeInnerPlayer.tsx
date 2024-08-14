@@ -29,16 +29,15 @@ export const YouTubeInnerPlayer = ({ videoId, onReady }: Props) => {
     return null;
   }
 
+  console.log(videoId, opts)
+
   return (
     <YouTube
       id={'YT-' + videoId}
       className='youtube-player'
       videoId={videoId}
       opts={opts}
-      onReady={(event) => {
-        console.log("on ready");
-        onReady(event);
-      }}
+      onReady={onReady}
     />
   );
 };

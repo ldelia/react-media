@@ -10,6 +10,7 @@ import {
   getTimelineWrapperWidth,
   numberToPxString,
 } from './utils/utils';
+import { TimelineMarkers } from './TimelineMarkers/TimelineMarkers';
 
 const TimelineContainer = styled.div`
   background-color: #f0f0f0;
@@ -37,6 +38,7 @@ export interface TimelineProps {
   className?: string;
   selectedRange?: number[];
   withTimeBlocks?: boolean;
+  markers?: number[];
   onChange?: (value: number) => void;
   onRangeChange?: (value: number[]) => void;
 }
@@ -46,6 +48,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   value,
   zoomLevel = 0,
   selectedRange = [],
+  markers = [],
   withTimeBlocks = true,
   onChange = () => {},
   onRangeChange = () => {},
@@ -127,6 +130,7 @@ export const Timeline: React.FC<TimelineProps> = ({
             withTimeBlocks={withTimeBlocks}
           />
           <TimelineValue value={value} canvasRef={canvasRef} />
+          <TimelineMarkers markers={markers} />
           <RangeSelectorCanvas
             selectedRange={selectedRange}
             onChange={onChange}
