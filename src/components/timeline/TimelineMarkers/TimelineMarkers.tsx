@@ -30,7 +30,7 @@ export const TimelineMarkers = ({ markers }: Props) => {
     <>
       {
         markers.map((marker, index) => (
-          <MarkerContainer key={index} style={{ left: secondsToPixel(zoomContextValue, marker) }}>
+          <MarkerContainer key={index} style={{ left: secondsToPixel(zoomContextValue, marker) }} className={'media-timeline-marker'}>
             <MarkerInner />
           </MarkerContainer>
         ))

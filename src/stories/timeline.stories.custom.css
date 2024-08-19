@@ -27,3 +27,14 @@
     height: 4px;
     background-color: rgba(10, 10, 10, 0.24);
 }
+
+#storybook-root .minimalist > div > .media-timeline-marker {
+    margin-top: 82px;
+}
+#storybook-root .minimalist > div > .media-timeline-marker div{
+    width: 4px;
+    height: 20px;
+    background-color: #4CAF50;
+    position: absolute;
+    border: none;
+}

@@ -63,6 +63,7 @@ Minimalist.args = {
   zoomLevel: 0,
   withTimeBlocks: false,
   className: 'minimalist',
+  markers: [],
 };
 
 export const WithSelectedRangeAndMarkers = Template.bind({});
