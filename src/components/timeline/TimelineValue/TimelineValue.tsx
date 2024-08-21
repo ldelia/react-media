@@ -48,7 +48,7 @@ export const TimelineValue: React.FC<Props> = ({ canvasRef, value }) => {
     const valueLineWidth: number = getComputedElementWidth(valueLineElement);
     const linePosition: number = secondsToPixel(zoomContextValue, value);
     const valueLinePositionBeginningConsideringWidth: number =
-      linePosition - valueLineWidth / 2;
+      Math.max(linePosition - valueLineWidth / 2, 0);
 
     // configure preValueLineElement
     preValueLineElement.style.width = numberToPxString(

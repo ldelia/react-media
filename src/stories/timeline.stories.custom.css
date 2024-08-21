@@ -28,6 +28,11 @@
     background-color: rgba(10, 10, 10, 0.24);
 }
 
+#storybook-root .minimalist > div > .media-timeline-range-selector-canvas {
+    height: 10px;
+    top: 35px;
+}
+
 #storybook-root .minimalist > div > .media-timeline-marker {
     margin-top: 82px;
 }

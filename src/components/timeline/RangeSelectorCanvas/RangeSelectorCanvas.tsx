@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { ZoomContext, ZoomContextType } from '../ZoomContext/ZoomContext';
 import { pixelToSeconds, secondsToPixel } from '../utils/utils';
@@ -10,7 +10,13 @@ const OverlayCanvas = styled.canvas`
   width: 100%;
   height: 100%;
   color: cadetblue;
+  cursor: pointer;
 `;
+
+interface Selection {
+  start: number | null;
+  end: number | null;
+}
 
 export interface RangeSelectorCanvasProps {
   selectedRange: number[];
@@ -23,10 +29,12 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
   onChange,
   onRangeChange,
 }) => {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomContextValue: ZoomContextType = useContext(ZoomContext);
 
-  let isSelectingRange: boolean = false;
+  const [selection, setSelection] = useState<Selection>({ start: null, end: null });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
   let selectedRangeInPixels: number[] = useMemo(() => [], []);
   if (selectedRange.length === 2) {
     selectedRangeInPixels = [
@@ -34,7 +42,6 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
       secondsToPixel(zoomContextValue, selectedRange[1]),
     ];
   }
-  let lastValidSelectedRangeInPixels: number[] = [];
 
   const getMousePointerPixelPosition = (e: { clientX: number }) => {
     const canvas: HTMLCanvasElement = canvasRef.current!;
@@ -54,91 +61,57 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     context.globalAlpha = 1.0;
   };
 
-  const onCanvasDoubleClick = (e: { clientX: number }) => {
-    const x0 = getMousePointerPixelPosition(e);
-    onChange(pixelToSeconds(zoomContextValue, x0));
-    selectedRangeInPixels = lastValidSelectedRangeInPixels;
+  // Handle mouse down (start of selection)
+  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const pixel = getMousePointerPixelPosition(event);
+    const second = pixelToSeconds(zoomContextValue, pixel);
+
+    setSelection({ start: second, end: null });
+    setIsDragging(true);
   };
 
-  const isPixelNearSelectedRange = (x0: number) => {
-    if (selectedRangeInPixels.length === 2) {
-      const diff = Math.min(
-        Math.abs(selectedRangeInPixels[0] - x0),
-        Math.abs(selectedRangeInPixels[1] - x0),
-      );
-      return diff <= zoomContextValue.pixelsInSecond / 2;
-    }
-    return false;
-  };
+  // Handle mouse up (end of selection or single click)
+  const handleMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-  const onCanvasMouseDown = (e: { clientX: number }) => {
-    const mouseCurrentPosition = getMousePointerPixelPosition(e);
+    const pixel = getMousePointerPixelPosition(event);
+    const second = pixelToSeconds(zoomContextValue, pixel);
 
-    if (!isPixelNearSelectedRange(mouseCurrentPosition)) {
-      // Keep track of the first position of the new range.
-      selectedRangeInPixels = [mouseCurrentPosition, mouseCurrentPosition];
-    }
-    isSelectingRange = true;
-  };
-
-  const onCanvasMouseMove = (e: { clientX: number }) => {
-    const canvas: HTMLCanvasElement = canvasRef.current!;
-    const context = canvas.getContext('2d')!;
-    const mouseCurrentPosition = getMousePointerPixelPosition(e);
-
-    if (selectedRangeInPixels.length === 2) {
-      const diff = Math.min(
-        Math.abs(selectedRangeInPixels[0] - mouseCurrentPosition),
-        Math.abs(selectedRangeInPixels[1] - mouseCurrentPosition),
-      );
-      // Change the mouse's cursor if it's near a selected range.
-      canvas.style.cursor =
-        diff <= zoomContextValue.pixelsInSecond / 2 ? 'col-resize' : 'default';
-
-      if (!isSelectingRange) return;
-
-      if (mouseCurrentPosition < selectedRangeInPixels[0]) {
-        // The left side must be enlarged.
-        selectedRangeInPixels[0] = mouseCurrentPosition;
-      } else if (mouseCurrentPosition > selectedRangeInPixels[1]) {
-        // The right side must be enlarged.
-        selectedRangeInPixels[1] = mouseCurrentPosition;
-      } else {
-        const diffX0 = mouseCurrentPosition - selectedRangeInPixels[0];
-        const diffX1 = selectedRangeInPixels[1] - mouseCurrentPosition;
-        if (diffX0 < diffX1) {
-          // The left side must be shrunk.
-          selectedRangeInPixels[0] = mouseCurrentPosition;
+    if (isDragging) {
+      setSelection(prevSelection => {
+        if (prevSelection.start === second) {
+          onChange(second);
         } else {
-          // The right side must be shrunk.
-          selectedRangeInPixels[1] = mouseCurrentPosition;
+          onRangeChange([prevSelection.start!, second]);
         }
-      }
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      drawRect(selectedRangeInPixels[0], selectedRangeInPixels[1]);
+
+        return {
+          start: prevSelection.start,
+          end: second,
+        }
+      });
     }
+    setIsDragging(false);
   };
 
-  const onCanvasMouseUp = (e: { clientX: number }) => {
-    if (selectedRangeInPixels.length !== 2) return;
+  // Handle mouse move (for dragging)
+  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDragging) return;
 
-    isSelectingRange = false;
-    const mouseCurrentPosition = getMousePointerPixelPosition(e);
-    const pixelRange = [
-      Math.min(selectedRangeInPixels[0], mouseCurrentPosition),
-      Math.max(selectedRangeInPixels[1], mouseCurrentPosition),
-    ];
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    if (pixelRange[1] - pixelRange[0] <= 1) {
-      // It was just a click
-      selectedRangeInPixels = lastValidSelectedRangeInPixels;
-    } else {
-      lastValidSelectedRangeInPixels = pixelRange;
-      onRangeChange([
-        pixelToSeconds(zoomContextValue, pixelRange[0]),
-        pixelToSeconds(zoomContextValue, pixelRange[1]),
-      ]);
-    }
+    const pixel = getMousePointerPixelPosition(event);
+    const second = pixelToSeconds(zoomContextValue, pixel);
+
+    setSelection(prevSelection => ({
+      start: prevSelection.start,
+      end: second,
+    }));
   };
 
   useEffect(() => {
@@ -155,10 +128,9 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
   return (
     <OverlayCanvas
       ref={canvasRef}
-      onDoubleClick={onCanvasDoubleClick}
-      onMouseDown={onCanvasMouseDown}
-      onMouseMove={onCanvasMouseMove}
-      onMouseUp={onCanvasMouseUp}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       className={'media-timeline-range-selector-canvas'}
     />
   );
