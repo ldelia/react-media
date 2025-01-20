@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Meta, StoryFn } from '@storybook/react';
 import { Reproduction, ReproductionWidget, ReproductionWidgetProps } from '../components/reproduction-widget';
 
@@ -16,7 +16,7 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
 
   // Handle initialization of reproduction
   const handleInit = useCallback((reproductionInstance: Reproduction) => {
-    const refreshEvent =(args: any) => { setReproductionTimestamp(new Date().getTime()) };
+    const refreshEvent =(args: any) => { setReproductionTimestamp(new Date().getTime()); console.log("refresh") };
 
     setReproduction(reproductionInstance);
     reproductionInstance.on('COUNTING_IN', (args: any) => { console.log("counting in", args) });
@@ -60,6 +60,7 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
         <button onClick={handleResume} disabled={!reproduction || reproduction.isPlaying()}>
           Resume
         </button>
+        Current time: {reproduction?.getCurrentTime()}
       </div>
     </div>
   );
@@ -70,4 +71,11 @@ Default.args = {
   trainingMode: true,
   videoId: 'jFI-RBqXzhU',
   songTempo: 180,
+};
+
+export const PlayAlong = Template.bind({});
+PlayAlong.args = {
+  trainingMode: false,
+  songTempo: 180,
+  duration: 220,
 };
