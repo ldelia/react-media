@@ -7,13 +7,13 @@ export type Props = {
 };
 
 interface TickTimeContainerProps {
-  left: string;
+  $left: string;
 }
 
 const TickTimeContainer = styled.span.attrs<TickTimeContainerProps>(
   (props) => ({
     style: {
-      left: props.left,
+      left: props.$left,
     },
   }),
 )<TickTimeContainerProps>`
@@ -34,7 +34,7 @@ const TickTime: React.FC<Props> = ({ start, leftPosition }) => {
     seconds < 10 ? '0' + seconds : seconds.toString();
   return (
     <TickTimeContainer
-      left={leftPosition}
+      $left={leftPosition}
       className={'media-timeline-tick-time'}
     >
       {minutes}:{secondsFormatted}
