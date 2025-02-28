@@ -8,6 +8,16 @@ interface Props {
 }
 export const YouTubeInnerPlayer = ({ videoId, onReady }: Props) => {
   return (
-    <ReactPlayer url={`https://www.youtube.com/watch?v=${videoId}`} onReady={(event) => onReady({ target: event.getInternalPlayer() as InnerYouTubePlayerInterface })} />
+    <ReactPlayer
+      url={`https://www.youtube.com/watch?v=${videoId}`} onReady={(event) => {
+      // Remove focus from the iframe
+      // This is a workaround for a bug in react-player https://github.com/cookpete/react-player/issues/1124
+      const internalPlayer = event.getInternalPlayer();
+      const iframe = internalPlayer.getIframe();
+      iframe.tabIndex = -1;
+
+      // Propagate internal player
+      onReady({ target: event.getInternalPlayer() as InnerYouTubePlayerInterface });
+    }}  />
   );
 };
