@@ -6,6 +6,7 @@ import { InnerYouTubePlayerInterface } from './models/Player/YouTubePlayer';
 
 interface BaseProps {
   trainingMode: boolean;
+  withCountingIn?: boolean;
   songTempo?: number;
   onInit: (reproduction: Reproduction) => void;
 }
@@ -28,6 +29,7 @@ export const ReproductionWidget = ({
   trainingMode,
   duration,
   videoId,
+  withCountingIn = true,
   songTempo = 0,
   onInit,
 }: ReproductionWidgetProps) => {
@@ -37,7 +39,7 @@ export const ReproductionWidget = ({
       .withTrainingMode(false)
       .withSongDuration(duration!)
       .withSongTempo(songTempo)
-      .withCountingIn(songTempo > 0)
+      .withCountingIn(withCountingIn && songTempo > 0)
       .withInnerPlayer(event.target)
       .createReproduction();
     onInit(newReproduction);
@@ -49,7 +51,7 @@ export const ReproductionWidget = ({
     let newReproduction = Reproduction.newBuilder()
       .withTrainingMode(true)
       .withSongTempo(songTempo)
-      .withCountingIn(songTempo > 0)
+      .withCountingIn(withCountingIn && songTempo > 0)
       .withInnerPlayer(event.target)
       .createReproduction();
     onInit(newReproduction);
