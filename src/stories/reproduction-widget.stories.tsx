@@ -16,7 +16,7 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
 
   // Handle initialization of reproduction
   const handleInit = useCallback((reproductionInstance: Reproduction) => {
-    const refreshEvent =(args: any) => { setReproductionTimestamp(new Date().getTime()); console.log("refresh") };
+    const refreshEvent =(args: any) => { setReproductionTimestamp(new Date().getTime()); };
 
     setReproduction(reproductionInstance);
     reproductionInstance.on('COUNTING_IN', (args: any) => { console.log("counting in", args) });
@@ -60,7 +60,9 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
         <button onClick={handleResume} disabled={!reproduction || reproduction.isPlaying()}>
           Resume
         </button>
-        Current time: {reproduction?.getCurrentTime()}
+        {reproduction && (
+          <div>Current time: {reproduction?.getCurrentTime()}</div>
+        )}
       </div>
     </div>
   );
@@ -78,4 +80,12 @@ PlayAlong.args = {
   trainingMode: false,
   songTempo: 180,
   duration: 220,
+};
+
+export const InvalidVideo = Template.bind({});
+InvalidVideo.args = {
+  trainingMode: true,
+  videoId: 'Y8jDVJrOHvo',
+  songTempo: 180,
+  onVideoUnavailable: () => console.error('Video unavailable'),
 };

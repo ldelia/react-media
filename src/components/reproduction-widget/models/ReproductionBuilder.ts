@@ -1,7 +1,6 @@
-import { YouTubePlayer } from './Player/YouTubePlayer';
+import { InnerYouTubePlayerInterface, YouTubePlayer } from './Player/YouTubePlayer';
 import { PlayAlongPlayer } from './Player/PlayAlongPlayer';
 import { Reproduction } from './Reproduction';
-import { InnerYouTubePlayerInterface } from './Player/YouTubePlayer';
 
 export class ReproductionBuilder {
   private trainingMode: boolean;

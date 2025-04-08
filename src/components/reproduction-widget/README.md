@@ -15,17 +15,19 @@ Currently, it supports YouTube videos and a silent mode, meaning a reproduction 
   trainingMode={true}
   videoId={'jFI-RBqXzhU'}
   onInit={(reproduction) => { reproduction.start() }}
+  onVideoUnavailable={() => console.error('Video unavailable')}
 />
 ```
 
 ##### Required props
 
-| Name           | Type       | Description                                                                         |
-|----------------|------------|-------------------------------------------------------------------------------------|
-| `trainingMode` | `boolean`  | If true, will reproduce the video with youtube, otherwise, silent mode will be used |
-| `videoId`      | `string`   | YouTube video id (required if trainingMode === true)                                |
-| `duration`     | `number`   | Song duration (required if trainingMode === false)                                  |
-| `onInit`       | `function` | Fired when the reproduction is ready to use                                         |   
+| Name                 | Type       | Description                                                                              |
+|----------------------|------------|------------------------------------------------------------------------------------------|
+| `trainingMode`       | `boolean`  | If true, will reproduce the video with youtube, otherwise, silent mode will be used      |
+| `duration`           | `number`   | Song duration (required if trainingMode === false)                                       |
+| `videoId`            | `string`   | YouTube video id (required if trainingMode === true)                                     |
+| `onVideoUnavailable` | `function` | Fired when the YouTube video is not available <br/> due to restrictions like age verification, regional limits, copyright issues, <br/>or if the video isn't allowed to be embedded on other platforms<br/> (required if trainingMode === true) |
+| `onInit`             | `function` | Fired when the reproduction is ready to use                                              |   
 
 ##### Optional props
 
