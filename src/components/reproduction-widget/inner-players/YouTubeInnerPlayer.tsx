@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { InnerYouTubePlayerInterface } from '../models/Player/YouTubePlayer';
 import ReactPlayer from 'react-player/lazy';
 
@@ -41,6 +41,15 @@ export const YouTubeInnerPlayer = ({ videoId, onReady, onVideoUnavailable }: Pro
       console.warn('Unhandled YouTube error:', error);
     }
   };
+
+  // Reset refs when videoId changes
+  useEffect(() => {
+    hasErrorRef.current = false;
+    if (readyTimeoutRef.current) {
+      clearTimeout(readyTimeoutRef.current);
+      readyTimeoutRef.current = null;
+    }
+  }, [videoId]);
 
   return (
     <ReactPlayer
