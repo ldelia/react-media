@@ -4,13 +4,14 @@ import { ZoomContext, ZoomContextType } from '../ZoomContext/ZoomContext';
 import { pixelToSeconds, secondsToPixel } from '../utils/utils';
 
 const OverlayCanvas = styled.canvas`
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    color: cadetblue;
-    cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: cadetblue;
+  cursor: pointer;
+  z-index: 2; // Ensure this canvas is on top of the TimeLineValue, otherwise, we won't be able to change the range until the current TimelineValue position
 `;
 
 interface Selection {
@@ -22,7 +23,7 @@ enum DragMode {
   NONE,
   CREATE,
   RESIZE_START,
-  RESIZE_END
+  RESIZE_END,
 }
 
 export interface RangeSelectorCanvasProps {
@@ -34,14 +35,17 @@ export interface RangeSelectorCanvasProps {
 const RESIZE_HANDLE_WIDTH = 10; // Width in pixels for the resize handle detection zone
 
 const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
-                                                                   selectedRange,
-                                                                   onChange,
-                                                                   onRangeChange,
-                                                                 }) => {
+  selectedRange,
+  onChange,
+  onRangeChange,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomContextValue: ZoomContextType = useContext(ZoomContext);
 
-  const [selection, setSelection] = useState<Selection>({ start: null, end: null });
+  const [selection, setSelection] = useState<Selection>({
+    start: null,
+    end: null,
+  });
   const [dragMode, setDragMode] = useState<DragMode>(DragMode.NONE);
   const [cursorStyle, setCursorStyle] = useState<string>('pointer');
 
@@ -65,7 +69,9 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
   };
 
   // Check if mouse is near the start or end edge of the selection
-  const isNearSelectionEdge = (pixel: number): { isNear: boolean, edge: 'start' | 'end' | null } => {
+  const isNearSelectionEdge = (
+    pixel: number,
+  ): { isNear: boolean; edge: 'start' | 'end' | null } => {
     if (selectedRange.length !== 2) return { isNear: false, edge: null };
 
     const startPixel = secondsToPixel(zoomContextValue, selectedRange[0]);
@@ -128,9 +134,10 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
         setSelection({ start: null, end: null });
       } else {
         // Created a new selection
-        const curatedSelection = seconds < selection.start!
-          ? [seconds, selection.start!]
-          : [selection.start!, seconds];
+        const curatedSelection =
+          seconds < selection.start!
+            ? [seconds, selection.start!]
+            : [selection.start!, seconds];
 
         onRangeChange(curatedSelection);
         setSelection({
@@ -138,12 +145,15 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
           end: curatedSelection[1],
         });
       }
-    } else if (dragMode === DragMode.RESIZE_START || dragMode === DragMode.RESIZE_END) {
+    } else if (
+      dragMode === DragMode.RESIZE_START ||
+      dragMode === DragMode.RESIZE_END
+    ) {
       // Resizing completed
       if (selection.start !== null && selection.end !== null) {
         const curatedSelection = [
           Math.min(selection.start, selection.end),
-          Math.max(selection.start, selection.end)
+          Math.max(selection.start, selection.end),
         ];
         onRangeChange(curatedSelection);
       }
@@ -166,17 +176,17 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     const seconds = pixelToSeconds(zoomContextValue, pixel);
 
     if (dragMode === DragMode.CREATE) {
-      setSelection(prevSelection => ({
+      setSelection((prevSelection) => ({
         start: prevSelection.start,
         end: seconds,
       }));
     } else if (dragMode === DragMode.RESIZE_START) {
-      setSelection(prevSelection => ({
+      setSelection((prevSelection) => ({
         start: seconds,
         end: prevSelection.end,
       }));
     } else if (dragMode === DragMode.RESIZE_END) {
-      setSelection(prevSelection => ({
+      setSelection((prevSelection) => ({
         start: prevSelection.start,
         end: seconds,
       }));
@@ -190,10 +200,14 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 
-    if (selectedRange.length !== 2 || zoomContextValue.timelineWrapperWidth === 0) return;
+    if (
+      selectedRange.length !== 2 ||
+      zoomContextValue.timelineWrapperWidth === 0
+    )
+      return;
     drawRect(
       secondsToPixel(zoomContextValue, selectedRange[0]),
-      secondsToPixel(zoomContextValue, selectedRange[1])
+      secondsToPixel(zoomContextValue, selectedRange[1]),
     );
   }, [selectedRange, zoomContextValue]);
 
@@ -208,7 +222,7 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
 
     drawRect(
       secondsToPixel(zoomContextValue, selection.start),
-      secondsToPixel(zoomContextValue, selection.end)
+      secondsToPixel(zoomContextValue, selection.end),
     );
   }, [selection, zoomContextValue]);
 
