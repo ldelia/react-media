@@ -15,6 +15,7 @@ interface TrainingProps extends BaseProps {
   trainingMode: true;
   duration?: never;
   videoId: string;
+  initialVolume?: number; // between 0 and 100
   onVideoUnavailable: () => void;
 }
 
@@ -22,6 +23,7 @@ interface NonTrainingProps extends BaseProps {
   trainingMode: false;
   duration: number;
   videoId?: never;
+  initialVolume?: never;
   onVideoUnavailable?: never;
 }
 
@@ -31,6 +33,7 @@ export const ReproductionWidget = ({
   trainingMode,
   duration,
   videoId,
+  initialVolume = 50,
   withCountingIn = true,
   songTempo = 0,
   onInit,
@@ -56,6 +59,7 @@ export const ReproductionWidget = ({
       .withSongTempo(songTempo)
       .withCountingIn(withCountingIn && songTempo > 0)
       .withInnerPlayer(event.target)
+      .withVolume(initialVolume)
       .createReproduction();
     onInit(newReproduction);
   }

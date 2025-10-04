@@ -7,6 +7,7 @@ export class ReproductionBuilder {
   private requiresCountingIn: boolean;
   private songDuration: number | null;
   private songTempo: number | null;
+  private volume: number; // between 0 and 100
   private innerPlayer: InnerYouTubePlayerInterface | string | null;
 
   constructor() {
@@ -14,6 +15,7 @@ export class ReproductionBuilder {
     this.requiresCountingIn = false;
     this.songDuration = null;
     this.songTempo = null;
+    this.volume = 50;
     this.innerPlayer = null;
   }
 
@@ -42,6 +44,11 @@ export class ReproductionBuilder {
     return this;
   }
 
+  withVolume(volume: number) {
+    this.volume = volume;
+    return this;
+  }
+
   createReproduction() {
     if (this.requiresCountingIn && this.songTempo === null) {
       throw new Error('The song tempo is mandatory');
@@ -63,7 +70,8 @@ export class ReproductionBuilder {
     return new Reproduction(
       player,
       this.requiresCountingIn,
-      this.songTempo || 0
+      this.songTempo || 0,
+      this.volume
     );
   }
 }

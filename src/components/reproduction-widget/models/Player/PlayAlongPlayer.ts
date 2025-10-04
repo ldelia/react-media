@@ -13,10 +13,6 @@ export class PlayAlongPlayer {
   private [dispatchOnReadyHandlers]: (() => void)[];
   private [dispatchOnFinishHandlers]: (() => void)[];
 
-  static get EVENTS() {
-    return PLAYER_EVENTS;
-  }
-
   constructor(duration: number, innerPlayer: string) {
     this.interval = null;
     this.currentTime = 0;
@@ -31,9 +27,8 @@ export class PlayAlongPlayer {
     this.setInnerPlayer(innerPlayer);
   }
 
-  private setInnerPlayer(innerPlayer: string) {
-    this.innerPlayer = innerPlayer;
-    this.dispatch(PlayAlongPlayer.EVENTS.READY);
+  static get EVENTS() {
+    return PLAYER_EVENTS;
   }
 
   play() {
@@ -69,6 +64,8 @@ export class PlayAlongPlayer {
   seekTo(seconds: number) {
     this.currentTime = seconds;
   }
+
+  setVolume(volume: number) {}
 
   getCurrentTime() {
     return this.currentTime;
@@ -125,5 +122,10 @@ export class PlayAlongPlayer {
       handler = ref[i];
       handler();
     }
+  }
+
+  private setInnerPlayer(innerPlayer: string) {
+    this.innerPlayer = innerPlayer;
+    this.dispatch(PlayAlongPlayer.EVENTS.READY);
   }
 }

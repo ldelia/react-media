@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react-webpack5';
 import { Reproduction, ReproductionWidget, ReproductionWidgetProps } from '../components/reproduction-widget';
 
 export default {
@@ -63,6 +63,11 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
         {reproduction && (
           <div>Current time: {reproduction?.getCurrentTime()}</div>
         )}
+        {reproduction && (
+          <div>Volume: {reproduction?.getVolume()}</div>
+        )}
+        <button onClick={() => reproduction?.setVolume(reproduction.getVolume() - 10)} disabled={!reproduction || reproduction.getVolume() <= 10}>Volume -10</button>
+        <button onClick={() => reproduction?.setVolume(reproduction.getVolume() + 10)} disabled={!reproduction || reproduction.getVolume() >= 100}>Volume +10</button>
       </div>
     </div>
   );
@@ -73,6 +78,14 @@ Default.args = {
   trainingMode: true,
   videoId: 'jFI-RBqXzhU',
   songTempo: 180,
+};
+
+export const WhisperingVideo = Template.bind({});
+WhisperingVideo.args = {
+  trainingMode: true,
+  videoId: 'jFI-RBqXzhU',
+  songTempo: 180,
+  initialVolume: 10,
 };
 
 export const PlayAlong = Template.bind({});

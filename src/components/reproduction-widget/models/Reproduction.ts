@@ -41,6 +41,7 @@ export class Reproduction {
   private ready: boolean;
   private interval: ReturnType<typeof setInterval> | null;
   private countingInCounter: number;
+  private volume: number = 50; // between 0 and 100
   private [dispatchOnReadyHandlers]: Handler[];
   private [dispatchOnSongStartHandlers]: Handler[];
   private [dispatchOnCountingInHandlers]: Handler[];
@@ -49,15 +50,7 @@ export class Reproduction {
   private [dispatchOnPausedHandlers]: Handler[];
   private [dispatchOnFinishHandlers]: Handler[];
 
-  static get EVENTS() {
-    return EVENTS;
-  }
-
-  static get STATES() {
-    return STATES;
-  }
-
-  constructor(player: Player, requiresCountingIn: boolean, songTempo: number) {
+  constructor(player: Player, requiresCountingIn: boolean, songTempo: number, volume: number) {
     this[dispatchOnReadyHandlers] = [];
     this[dispatchOnSongStartHandlers] = [];
     this[dispatchOnCountingInHandlers] = [];
@@ -76,6 +69,8 @@ export class Reproduction {
     this.requiresCountingIn = requiresCountingIn;
     this.countingInCounter = 0;
 
+    this.setVolume(volume);
+
     this.player.on(PLAYER_EVENTS.READY, () => {
       this.ready = true;
       this.dispatch(Reproduction.EVENTS.READY);
@@ -86,6 +81,18 @@ export class Reproduction {
       clearInterval(this.interval as NodeJS.Timeout);
       this.dispatch(Reproduction.EVENTS.FINISH);
     });
+  }
+
+  static get EVENTS() {
+    return EVENTS;
+  }
+
+  static get STATES() {
+    return STATES;
+  }
+
+  static newBuilder() {
+    return new ReproductionBuilder();
   }
 
   on(eventName: keyof typeof Reproduction.EVENTS, handler: Handler) {
@@ -145,27 +152,6 @@ export class Reproduction {
       handler(args);
       // setTimeout(handler, 0);
     }
-  }
-
-  private countInAndPlay(timeout: number, limit: number) {
-    // the initial count starts instantly, no need to wait
-    this.countingInCounter++;
-    this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
-
-    const interval = setInterval(() => {
-      this.countingInCounter++;
-      if (this.countingInCounter === limit) {
-        clearInterval(interval);
-        this.countingInCounter = 0;
-        if (limit !== 5) {
-          this.countInAndPlay(this.getBPMInterval(), 5);
-        } else {
-          this.play();
-        }
-      } else {
-        this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
-      }
-    }, timeout);
   }
 
   start() {
@@ -252,6 +238,20 @@ export class Reproduction {
     this.player.seekTo(seconds);
   }
 
+  getVolume() {
+    return this.volume;
+  }
+
+  setVolume(volume: number) {
+    if (volume < 0) {
+      volume = 0;
+    } else if (volume > 100) {
+      volume = 100;
+    }
+    this.volume = volume;
+    this.player.setVolume(volume);
+  }
+
   getAvailablePlaybackRates() {
     return this.player.getAvailablePlaybackRates();
   }
@@ -268,7 +268,24 @@ export class Reproduction {
     return 60000 / this.getTempo();
   }
 
-  static newBuilder() {
-    return new ReproductionBuilder();
+  private countInAndPlay(timeout: number, limit: number) {
+    // the initial count starts instantly, no need to wait
+    this.countingInCounter++;
+    this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
+
+    const interval = setInterval(() => {
+      this.countingInCounter++;
+      if (this.countingInCounter === limit) {
+        clearInterval(interval);
+        this.countingInCounter = 0;
+        if (limit !== 5) {
+          this.countInAndPlay(this.getBPMInterval(), 5);
+        } else {
+          this.play();
+        }
+      } else {
+        this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
+      }
+    }, timeout);
   }
 }
