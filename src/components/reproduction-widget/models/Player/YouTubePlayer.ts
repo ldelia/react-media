@@ -13,10 +13,6 @@ export class YouTubePlayer {
   private [dispatchOnReadyHandlers]: (() => void)[];
   private [dispatchOnFinishHandlers]: (() => void)[];
 
-  static get EVENTS() {
-    return PLAYER_EVENTS;
-  }
-
   constructor(innerPlayer: InnerYouTubePlayerInterface) {
     this[dispatchOnFinishHandlers] = [];
     this[dispatchOnReadyHandlers] = [];
@@ -28,8 +24,8 @@ export class YouTubePlayer {
     this.innerPlayer = innerPlayer;
     this.dispatch(YouTubePlayer.EVENTS.READY);
 
-    // this is necessary for avoiding the state video cued.
-    // When a video is in this state, when user seek to X, the song is played
+    // This is necessary for avoiding the state video cued.
+    // When a video is in this state, when the user seeks to X, the song is played
     this.innerPlayer.playVideo();
     this.innerPlayer.pauseVideo();
 
@@ -47,6 +43,10 @@ export class YouTubePlayer {
         }
       }
     );
+  }
+
+  static get EVENTS() {
+    return PLAYER_EVENTS;
   }
 
   getInnerPlayer() {
@@ -72,8 +72,8 @@ export class YouTubePlayer {
     this.isRunning = false;
 
     /**
-     * Hay un issue al llamar a getDuration del video luego de reanudar una canción pausada (devuelve siempre 0)
-     * Para evitar que se pierda la información y tener que cargarla de nuevo, se simula un stop pausando y llevando al comienzo
+     * There's an issue when calling getDuration on the video after resuming a paused song (it always returns 0)
+     * To prevent losing this information and having to reload it, we simulate a stop by pausing and seeking to the start
      *  videoPlayer.stopVideo();
      */
     this.getInnerPlayer().pauseVideo();
@@ -90,6 +90,10 @@ export class YouTubePlayer {
     if (this.isRunning) {
       this.play();
     }
+  }
+
+  setVolume(volume: number) {
+    this.getInnerPlayer().setVolume(volume);
   }
 
   getCurrentTime() {

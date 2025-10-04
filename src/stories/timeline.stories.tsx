@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Timeline, TimelineProps } from '../components/timeline';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react-webpack5';
 import styled from 'styled-components';
 
 import './timeline.stories.custom.css';

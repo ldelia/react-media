@@ -31,6 +31,7 @@ Currently, it supports YouTube videos and a silent mode, meaning a reproduction 
 
 ##### Optional props
 
-| Name            | Type       | Default | Description                                   |
-| --------------- |------------|---------|-----------------------------------------------|
-| `songTempo`     | `number`   | `0`     | The song tempo, affects the counting in event |
+| Name            | Type       | Default | Description                                            |
+|-----------------|------------|---------|--------------------------------------------------------|
+| `songTempo`     | `number`   | `0`     | The song tempo, affects the counting in event          |
+| `initialVolume` | `number`   | `50`    | The initial song volume                                |
