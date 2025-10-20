@@ -23,7 +23,7 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
     reproductionInstance.on('PLAYING', refreshEvent);
     reproductionInstance.on('PAUSED', refreshEvent);
     reproductionInstance.on('FINISH', refreshEvent);
-    reproductionInstance.start();
+    reproductionInstance.on('ERROR', (args: any) => { console.error("Reproduction error", args) });
   }, []);
 
   const handleStop = () => {
