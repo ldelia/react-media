@@ -65,8 +65,6 @@ export class PlayAlongPlayer {
     this.currentTime = seconds;
   }
 
-  setVolume(volume: number) {}
-
   getCurrentTime() {
     return this.currentTime;
   }
@@ -94,8 +92,6 @@ export class PlayAlongPlayer {
 
   on(eventName: keyof typeof PlayAlongPlayer.EVENTS, handler: () => void) {
     switch (eventName) {
-      case PlayAlongPlayer.EVENTS.READY:
-        return this[dispatchOnReadyHandlers].push(handler);
       case PlayAlongPlayer.EVENTS.FINISH:
         return this[dispatchOnFinishHandlers].push(handler);
       default:
@@ -108,9 +104,6 @@ export class PlayAlongPlayer {
     let ref: (() => void)[] = [];
 
     switch (eventName) {
-      case PlayAlongPlayer.EVENTS.READY:
-        ref = this[dispatchOnReadyHandlers];
-        break;
       case PlayAlongPlayer.EVENTS.FINISH:
         ref = this[dispatchOnFinishHandlers];
         break;
@@ -124,8 +117,15 @@ export class PlayAlongPlayer {
     }
   }
 
+  countingStarted() {}
+
+  countingFinished() {}
+
+  setVolume(volume: number) {}
+
+  getVolume() { return 0 }
+
   private setInnerPlayer(innerPlayer: string) {
     this.innerPlayer = innerPlayer;
-    this.dispatch(PlayAlongPlayer.EVENTS.READY);
   }
 }

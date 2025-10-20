@@ -44,6 +44,12 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
     }
   };
 
+  const handleStart = () => {
+    if (reproduction) {
+      reproduction.start();
+    }
+  };
+
   return (
     <div>
       <ReproductionWidget
@@ -57,8 +63,11 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
         <button onClick={handlePause} disabled={!reproduction || !reproduction.isPlaying()}>
           Pause
         </button>
-        <button onClick={handleResume} disabled={!reproduction || reproduction.isPlaying()}>
+        <button onClick={handleResume} disabled={!reproduction || reproduction.isPlaying() || reproduction.getCurrentTime() > 0}>
           Resume
+        </button>
+        <button onClick={handleStart} disabled={!reproduction || reproduction.isPlaying()}>
+          Start
         </button>
         {reproduction && (
           <div>Current time: {reproduction?.getCurrentTime()}</div>

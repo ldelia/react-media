@@ -10,6 +10,7 @@ const dispatchOnErrorHandlers = Symbol();
 export class YouTubePlayer {
   private currentTime: number;
   private isRunning: boolean;
+  private volume: number = 50; // between 0 and 100
   private innerPlayer: InnerYouTubePlayerInterface;
   private [dispatchOnReadyHandlers]: (() => void)[];
   private [dispatchOnFinishHandlers]: (() => void)[];
@@ -24,7 +25,6 @@ export class YouTubePlayer {
     this.isRunning = false;
 
     this.innerPlayer = innerPlayer;
-    this.dispatch(YouTubePlayer.EVENTS.READY);
 
     // This is necessary for avoiding the state video cued.
     // When a video is in this state, when the user seeks to X, the song is played
@@ -103,7 +103,12 @@ export class YouTubePlayer {
   }
 
   setVolume(volume: number) {
+    this.volume = volume;
     this.getInnerPlayer().setVolume(volume);
+  }
+
+  getVolume() {
+    return this.volume;
   }
 
   getCurrentTime() {
@@ -137,8 +142,6 @@ export class YouTubePlayer {
 
   on(eventName: keyof typeof PlayAlongPlayer.EVENTS, handler: (error?: any) => void) {
     switch (eventName) {
-      case PlayAlongPlayer.EVENTS.READY:
-        return this[dispatchOnReadyHandlers].push(handler);
       case PlayAlongPlayer.EVENTS.FINISH:
         return this[dispatchOnFinishHandlers].push(handler);
       case PlayAlongPlayer.EVENTS.ERROR:
@@ -155,9 +158,6 @@ export class YouTubePlayer {
     let ref: ((error?: any) => void)[] = [];
 
     switch (eventName) {
-      case YouTubePlayer.EVENTS.READY:
-        ref = this[dispatchOnReadyHandlers];
-        break;
       case YouTubePlayer.EVENTS.FINISH:
         ref = this[dispatchOnFinishHandlers];
         break;
@@ -172,6 +172,33 @@ export class YouTubePlayer {
       handler = ref[i];
       setTimeout(() => handler(error), 0);
     }
+  }
+
+  countingStarted() {
+    /**
+     * iOS browsers enforce strict autoplay policies that require video playback
+     * to begin synchronously within a user interaction event (e.g., a tap or click).
+     * When we implemented the counting-in feature (1, 2, 1, 2, 3, go...),
+     * the asynchronous delays between counts caused iOS to lose the user interaction context,
+     * blocking video playback after the countdown completed.
+     * The video would work fine on web and Android, but fail to start on iOS Safari.
+     * To resolve this, we adopted a muted-first approach:
+     * the video begins playing immediately when the user initiates playback,
+     * but remains muted during the countdown sequence.
+     * Once the countdown completes, we unmute the video and restore the desired volume.
+     * This strategy satisfies iOS's autoplay requirements (muted videos can autoplay)
+     * while preserving the musical countdown experience.
+     * The user never notices the video is playing during the countdown
+     * since it's both muted and visually obscured by the countdown overlay.
+    * */
+    this.getInnerPlayer().setVolume(0);
+    this.getInnerPlayer().playVideo();
+  }
+
+  countingFinished() {
+    this.getInnerPlayer().pauseVideo();
+    this.getInnerPlayer().seekTo(0, true)
+    this.setVolume(this.volume);
   }
 
   private getErrorMessage(errorCode: number): string {
