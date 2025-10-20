@@ -5,6 +5,7 @@ export type InnerYouTubePlayerInterface = YT.Player;
 
 const dispatchOnReadyHandlers = Symbol();
 const dispatchOnFinishHandlers = Symbol();
+const dispatchOnErrorHandlers = Symbol();
 
 export class YouTubePlayer {
   private currentTime: number;
@@ -12,15 +13,16 @@ export class YouTubePlayer {
   private innerPlayer: InnerYouTubePlayerInterface;
   private [dispatchOnReadyHandlers]: (() => void)[];
   private [dispatchOnFinishHandlers]: (() => void)[];
+  private [dispatchOnErrorHandlers]: ((error: any) => void)[];
 
   constructor(innerPlayer: InnerYouTubePlayerInterface) {
     this[dispatchOnFinishHandlers] = [];
     this[dispatchOnReadyHandlers] = [];
+    this[dispatchOnErrorHandlers] = [];
 
     this.currentTime = 0;
     this.isRunning = false;
 
-    this.innerPlayer = innerPlayer;
     this.innerPlayer = innerPlayer;
     this.dispatch(YouTubePlayer.EVENTS.READY);
 
@@ -28,6 +30,14 @@ export class YouTubePlayer {
     // When a video is in this state, when the user seeks to X, the song is played
     this.innerPlayer.playVideo();
     this.innerPlayer.pauseVideo();
+
+    this.innerPlayer.addEventListener('onError', (event: YT.OnErrorEvent) => {
+      this.isRunning = false;
+      this.dispatch(YouTubePlayer.EVENTS.ERROR, {
+        code: event.data,
+        message: this.getErrorMessage(event.data)
+      });
+    });
 
     this.innerPlayer.addEventListener(
       'onStateChange',
@@ -125,20 +135,24 @@ export class YouTubePlayer {
     return this.getInnerPlayer() !== null;
   }
 
-  on(eventName: keyof typeof PlayAlongPlayer.EVENTS, handler: () => void) {
+  on(eventName: keyof typeof PlayAlongPlayer.EVENTS, handler: (error?: any) => void) {
     switch (eventName) {
       case PlayAlongPlayer.EVENTS.READY:
         return this[dispatchOnReadyHandlers].push(handler);
       case PlayAlongPlayer.EVENTS.FINISH:
         return this[dispatchOnFinishHandlers].push(handler);
+      case PlayAlongPlayer.EVENTS.ERROR:
+        return this[dispatchOnErrorHandlers].push(handler);
       default:
         break;
     }
   }
 
-  dispatch(eventName: keyof typeof PlayAlongPlayer.EVENTS) {
-    let handler, i, len;
-    let ref: (() => void)[] = [];
+  dispatch(eventName: keyof typeof PlayAlongPlayer.EVENTS, error?: any) {
+    let handler: ((error?: any) => void);
+    let i: number;
+    let len: number;
+    let ref: ((error?: any) => void)[] = [];
 
     switch (eventName) {
       case YouTubePlayer.EVENTS.READY:
@@ -147,13 +161,32 @@ export class YouTubePlayer {
       case YouTubePlayer.EVENTS.FINISH:
         ref = this[dispatchOnFinishHandlers];
         break;
+      case YouTubePlayer.EVENTS.ERROR:
+        ref = this[dispatchOnErrorHandlers];
+        break;
       default:
         break;
     }
 
     for (i = 0, len = ref.length; i < len; i++) {
       handler = ref[i];
-      setTimeout(handler, 0);
+      setTimeout(() => handler(error), 0);
+    }
+  }
+
+  private getErrorMessage(errorCode: number): string {
+    switch (errorCode) {
+      case YT.PlayerError.InvalidParam:
+        return 'Invalid parameter value';
+      case YT.PlayerError.Html5Error:
+        return 'HTML5 player error';
+      case YT.PlayerError.VideoNotFound:
+        return 'Video not found';
+      case YT.PlayerError.EmbeddingNotAllowed:
+      case YT.PlayerError.EmbeddingNotAllowed2:
+        return 'Video cannot be played in embedded players';
+      default:
+        return `Unknown error (code: ${errorCode})`;
     }
   }
 }

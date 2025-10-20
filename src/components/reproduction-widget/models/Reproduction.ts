@@ -20,6 +20,7 @@ const EVENTS = {
   PLAYING: 'PLAYING',
   PAUSED: 'PAUSED',
   FINISH: 'FINISH',
+  ERROR: 'ERROR',
 } as const;
 
 type Handler = (args: object) => void;
@@ -31,6 +32,7 @@ const dispatchOnPlayHandlers = Symbol();
 const dispatchOnPlayingHandlers = Symbol();
 const dispatchOnPausedHandlers = Symbol();
 const dispatchOnFinishHandlers = Symbol();
+const dispatchOnErrorHandlers = Symbol();
 
 export class Reproduction {
   private player: Player;
@@ -49,6 +51,7 @@ export class Reproduction {
   private [dispatchOnPlayingHandlers]: Handler[];
   private [dispatchOnPausedHandlers]: Handler[];
   private [dispatchOnFinishHandlers]: Handler[];
+  private [dispatchOnErrorHandlers]: Handler[];
 
   constructor(player: Player, requiresCountingIn: boolean, songTempo: number, volume: number) {
     this[dispatchOnReadyHandlers] = [];
@@ -58,6 +61,7 @@ export class Reproduction {
     this[dispatchOnPlayingHandlers] = [];
     this[dispatchOnPausedHandlers] = [];
     this[dispatchOnFinishHandlers] = [];
+    this[dispatchOnErrorHandlers] = [];
 
     this.songTempo = songTempo;
     this.player = player;
@@ -80,6 +84,10 @@ export class Reproduction {
       this.state = Reproduction.STATES.STOPPED;
       clearInterval(this.interval as NodeJS.Timeout);
       this.dispatch(Reproduction.EVENTS.FINISH);
+    });
+
+    this.player.on(PLAYER_EVENTS.ERROR, (error: any) => {
+      this.dispatch(Reproduction.EVENTS.ERROR, { error });
     });
   }
 
@@ -111,6 +119,8 @@ export class Reproduction {
         return this[dispatchOnPausedHandlers].push(handler);
       case Reproduction.EVENTS.FINISH:
         return this[dispatchOnFinishHandlers].push(handler);
+      case Reproduction.EVENTS.ERROR:
+        return this[dispatchOnErrorHandlers].push(handler);
       default:
         break;
     }
@@ -143,6 +153,9 @@ export class Reproduction {
       case Reproduction.EVENTS.FINISH:
         ref = this[dispatchOnFinishHandlers];
         break;
+      case Reproduction.EVENTS.ERROR:
+        ref = this[dispatchOnErrorHandlers];
+        break;
       default:
         break;
     }
@@ -150,7 +163,6 @@ export class Reproduction {
     for (i = 0, len = ref.length; i < len; i++) {
       handler = ref[i];
       handler(args);
-      // setTimeout(handler, 0);
     }
   }
 
@@ -163,6 +175,7 @@ export class Reproduction {
       this.state = Reproduction.STATES.COUNTING_IN;
       this.countInAndPlay(this.getBPMInterval() * 2, 3);
     } else {
+      this.seekTo(0);
       this.play();
     }
   }
