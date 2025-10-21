@@ -13,7 +13,6 @@ const STATES = {
 };
 
 const EVENTS = {
-  READY: 'READY',
   START: 'START',
   COUNTING_IN: 'COUNTING_IN',
   PLAY: 'PLAY',
@@ -40,10 +39,9 @@ export class Reproduction {
 
   private songTempo: number;
   private state: number;
-  private ready: boolean;
   private interval: ReturnType<typeof setInterval> | null;
   private countingInCounter: number;
-  private volume: number = 50; // between 0 and 100
+
   private [dispatchOnReadyHandlers]: Handler[];
   private [dispatchOnSongStartHandlers]: Handler[];
   private [dispatchOnCountingInHandlers]: Handler[];
@@ -65,7 +63,6 @@ export class Reproduction {
 
     this.songTempo = songTempo;
     this.player = player;
-    this.ready = false;
 
     this.state = Reproduction.STATES.STOPPED;
     this.interval = null;
@@ -73,19 +70,17 @@ export class Reproduction {
     this.requiresCountingIn = requiresCountingIn;
     this.countingInCounter = 0;
 
-    this.setVolume(volume);
+    this.player.setVolume(volume);
 
-    this.player.on(PLAYER_EVENTS.READY, () => {
-      this.ready = true;
-      this.dispatch(Reproduction.EVENTS.READY);
+    this.player.on(PLAYER_EVENTS.PLAYING, () => {
+      this.state = Reproduction.STATES.PLAYING;
+      this.dispatch(Reproduction.EVENTS.PLAY);
     });
-
     this.player.on(PLAYER_EVENTS.FINISH, () => {
       this.state = Reproduction.STATES.STOPPED;
       clearInterval(this.interval as NodeJS.Timeout);
       this.dispatch(Reproduction.EVENTS.FINISH);
     });
-
     this.player.on(PLAYER_EVENTS.ERROR, (error: any) => {
       this.dispatch(Reproduction.EVENTS.ERROR, { error });
     });
@@ -105,8 +100,6 @@ export class Reproduction {
 
   on(eventName: keyof typeof Reproduction.EVENTS, handler: Handler) {
     switch (eventName) {
-      case Reproduction.EVENTS.READY:
-        return this[dispatchOnReadyHandlers].push(handler);
       case Reproduction.EVENTS.START:
         return this[dispatchOnSongStartHandlers].push(handler);
       case Reproduction.EVENTS.COUNTING_IN:
@@ -132,9 +125,6 @@ export class Reproduction {
     let ref: Handler[] = [];
 
     switch (eventName) {
-      case Reproduction.EVENTS.READY:
-        ref = this[dispatchOnReadyHandlers];
-        break;
       case Reproduction.EVENTS.START:
         ref = this[dispatchOnSongStartHandlers];
         break;
@@ -167,6 +157,7 @@ export class Reproduction {
   }
 
   start() {
+    this.seekTo(0);
     if (this.state === Reproduction.STATES.STOPPED) {
       this.dispatch(Reproduction.EVENTS.START);
     }
@@ -175,14 +166,11 @@ export class Reproduction {
       this.state = Reproduction.STATES.COUNTING_IN;
       this.countInAndPlay(this.getBPMInterval() * 2, 3);
     } else {
-      this.seekTo(0);
       this.play();
     }
   }
 
   play() {
-    this.state = Reproduction.STATES.PLAYING;
-    this.dispatch(Reproduction.EVENTS.PLAY);
     this.player.play();
 
     const intervalTimeout = 200;
@@ -207,11 +195,6 @@ export class Reproduction {
     this.player.stop();
     clearInterval(this.interval as NodeJS.Timeout);
     this.dispatch(Reproduction.EVENTS.FINISH);
-  }
-
-  isReady() {
-    // It's necessary to avoid play the reproduction-widget when the player is not ready
-    return this.ready;
   }
 
   isPlaying() {
@@ -252,7 +235,7 @@ export class Reproduction {
   }
 
   getVolume() {
-    return this.volume;
+    return this.player.getVolume();
   }
 
   setVolume(volume: number) {
@@ -261,7 +244,6 @@ export class Reproduction {
     } else if (volume > 100) {
       volume = 100;
     }
-    this.volume = volume;
     this.player.setVolume(volume);
   }
 
@@ -280,6 +262,8 @@ export class Reproduction {
   getBPMInterval() {
     return 60000 / this.getTempo();
   }
+
+
 
   private countInAndPlay(timeout: number, limit: number) {
     // the initial count starts instantly, no need to wait

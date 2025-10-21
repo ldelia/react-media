@@ -1,30 +1,29 @@
-import { PlayAlongPlayer } from './PlayAlongPlayer';
 import { PLAYER_EVENTS } from './PlayerEvents';
 
 export type InnerYouTubePlayerInterface = YT.Player;
 
-const dispatchOnReadyHandlers = Symbol();
+const dispatchOnPlayingHandlers = Symbol();
 const dispatchOnFinishHandlers = Symbol();
 const dispatchOnErrorHandlers = Symbol();
 
 export class YouTubePlayer {
   private currentTime: number;
   private isRunning: boolean;
+  private volume: number = 50; // between 0 and 100
   private innerPlayer: InnerYouTubePlayerInterface;
-  private [dispatchOnReadyHandlers]: (() => void)[];
+  private [dispatchOnPlayingHandlers]: (() => void)[];
   private [dispatchOnFinishHandlers]: (() => void)[];
   private [dispatchOnErrorHandlers]: ((error: any) => void)[];
 
   constructor(innerPlayer: InnerYouTubePlayerInterface) {
     this[dispatchOnFinishHandlers] = [];
-    this[dispatchOnReadyHandlers] = [];
+    this[dispatchOnPlayingHandlers] = [];
     this[dispatchOnErrorHandlers] = [];
 
     this.currentTime = 0;
     this.isRunning = false;
 
     this.innerPlayer = innerPlayer;
-    this.dispatch(YouTubePlayer.EVENTS.READY);
 
     // This is necessary for avoiding the state video cued.
     // When a video is in this state, when the user seeks to X, the song is played
@@ -48,6 +47,15 @@ export class YouTubePlayer {
             this.isRunning = false;
             this.currentTime = 0;
             break;
+          case YT.PlayerState.PLAYING:
+            this.isRunning = true;
+            this.dispatch(YouTubePlayer.EVENTS.PLAYING);
+            break;
+          case YT.PlayerState.PAUSED:
+            this.isRunning = false;
+            this.currentTime = this.getInnerPlayer().getCurrentTime();
+            this.dispatch(YouTubePlayer.EVENTS.PAUSED);
+            break;
           default:
             break;
         }
@@ -64,18 +72,11 @@ export class YouTubePlayer {
   }
 
   play() {
-    const videoPlayer = this.getInnerPlayer();
-    videoPlayer.playVideo();
-
-    this.isRunning = true;
+    this.getInnerPlayer().playVideo();
   }
 
   pause() {
-    this.isRunning = false;
-
     this.getInnerPlayer().pauseVideo();
-
-    this.currentTime = this.getInnerPlayer().getCurrentTime();
   }
 
   stop() {
@@ -103,7 +104,12 @@ export class YouTubePlayer {
   }
 
   setVolume(volume: number) {
+    this.volume = volume;
     this.getInnerPlayer().setVolume(volume);
+  }
+
+  getVolume() {
+    return this.volume;
   }
 
   getCurrentTime() {
@@ -122,6 +128,10 @@ export class YouTubePlayer {
     return this.getInnerPlayer().getAvailablePlaybackRates();
   }
 
+  getState() {
+    return this.getInnerPlayer().getPlayerState();
+  }
+
   setPlaybackRate(playbackRate: number) {
     if (!this.getAvailablePlaybackRates().includes(playbackRate)) {
       throw new Error(
@@ -135,28 +145,28 @@ export class YouTubePlayer {
     return this.getInnerPlayer() !== null;
   }
 
-  on(eventName: keyof typeof PlayAlongPlayer.EVENTS, handler: (error?: any) => void) {
+  on(eventName: keyof typeof YouTubePlayer.EVENTS, handler: (error?: any) => void) {
     switch (eventName) {
-      case PlayAlongPlayer.EVENTS.READY:
-        return this[dispatchOnReadyHandlers].push(handler);
-      case PlayAlongPlayer.EVENTS.FINISH:
+      case YouTubePlayer.EVENTS.PLAYING:
+        return this[dispatchOnPlayingHandlers].push(handler);
+      case YouTubePlayer.EVENTS.FINISH:
         return this[dispatchOnFinishHandlers].push(handler);
-      case PlayAlongPlayer.EVENTS.ERROR:
+      case YouTubePlayer.EVENTS.ERROR:
         return this[dispatchOnErrorHandlers].push(handler);
       default:
         break;
     }
   }
 
-  dispatch(eventName: keyof typeof PlayAlongPlayer.EVENTS, error?: any) {
+  dispatch(eventName: keyof typeof YouTubePlayer.EVENTS, error?: any) {
     let handler: ((error?: any) => void);
     let i: number;
     let len: number;
     let ref: ((error?: any) => void)[] = [];
 
     switch (eventName) {
-      case YouTubePlayer.EVENTS.READY:
-        ref = this[dispatchOnReadyHandlers];
+      case YouTubePlayer.EVENTS.PLAYING:
+        ref = this[dispatchOnPlayingHandlers];
         break;
       case YouTubePlayer.EVENTS.FINISH:
         ref = this[dispatchOnFinishHandlers];
