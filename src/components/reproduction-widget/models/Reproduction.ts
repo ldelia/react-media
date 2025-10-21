@@ -72,12 +72,15 @@ export class Reproduction {
 
     this.player.setVolume(volume);
 
+    this.player.on(PLAYER_EVENTS.PLAYING, () => {
+      this.state = Reproduction.STATES.PLAYING;
+      this.dispatch(Reproduction.EVENTS.PLAY);
+    });
     this.player.on(PLAYER_EVENTS.FINISH, () => {
       this.state = Reproduction.STATES.STOPPED;
       clearInterval(this.interval as NodeJS.Timeout);
       this.dispatch(Reproduction.EVENTS.FINISH);
     });
-
     this.player.on(PLAYER_EVENTS.ERROR, (error: any) => {
       this.dispatch(Reproduction.EVENTS.ERROR, { error });
     });
@@ -154,6 +157,7 @@ export class Reproduction {
   }
 
   start() {
+    this.seekTo(0);
     if (this.state === Reproduction.STATES.STOPPED) {
       this.dispatch(Reproduction.EVENTS.START);
     }
@@ -167,8 +171,6 @@ export class Reproduction {
   }
 
   play() {
-    this.state = Reproduction.STATES.PLAYING;
-    this.dispatch(Reproduction.EVENTS.PLAY);
     this.player.play();
 
     const intervalTimeout = 200;
@@ -265,7 +267,6 @@ export class Reproduction {
 
   private countInAndPlay(timeout: number, limit: number) {
     // the initial count starts instantly, no need to wait
-    this.player.countingStarted();
     this.countingInCounter++;
     this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
 
@@ -277,7 +278,6 @@ export class Reproduction {
         if (limit !== 5) {
           this.countInAndPlay(this.getBPMInterval(), 5);
         } else {
-          this.player.countingFinished();
           this.play();
         }
       } else {

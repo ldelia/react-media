@@ -1,6 +1,6 @@
 import { PLAYER_EVENTS } from './PlayerEvents';
 
-const dispatchOnReadyHandlers = Symbol();
+const dispatchOnPlayingHandlers = Symbol();
 const dispatchOnFinishHandlers = Symbol();
 
 export class PlayAlongPlayer {
@@ -10,7 +10,7 @@ export class PlayAlongPlayer {
   private currentPlaybackRate: number;
   private innerPlayer: string | null;
   private interval: ReturnType<typeof setInterval> | null = null;
-  private [dispatchOnReadyHandlers]: (() => void)[];
+  private [dispatchOnPlayingHandlers]: (() => void)[];
   private [dispatchOnFinishHandlers]: (() => void)[];
 
   constructor(duration: number, innerPlayer: string) {
@@ -22,7 +22,7 @@ export class PlayAlongPlayer {
     this.innerPlayer = null;
 
     this[dispatchOnFinishHandlers] = [];
-    this[dispatchOnReadyHandlers] = [];
+    this[dispatchOnPlayingHandlers] = [];
 
     this.setInnerPlayer(innerPlayer);
   }
@@ -33,6 +33,7 @@ export class PlayAlongPlayer {
 
   play() {
     this.isRunning = true;
+    this.dispatch(PlayAlongPlayer.EVENTS.PLAYING);
 
     const intervalTimeout = 1000;
 
@@ -73,6 +74,10 @@ export class PlayAlongPlayer {
     return this.duration;
   }
 
+  getState() {
+    return this.isRunning ? 'PLAYING' : 'PAUSED';
+  }
+
   isAvailable() {
     return true;
   }
@@ -92,6 +97,8 @@ export class PlayAlongPlayer {
 
   on(eventName: keyof typeof PlayAlongPlayer.EVENTS, handler: () => void) {
     switch (eventName) {
+      case PlayAlongPlayer.EVENTS.PLAYING:
+        return this[dispatchOnPlayingHandlers].push(handler);
       case PlayAlongPlayer.EVENTS.FINISH:
         return this[dispatchOnFinishHandlers].push(handler);
       default:
@@ -104,6 +111,9 @@ export class PlayAlongPlayer {
     let ref: (() => void)[] = [];
 
     switch (eventName) {
+      case PlayAlongPlayer.EVENTS.PLAYING:
+        ref = this[dispatchOnPlayingHandlers];
+        break;
       case PlayAlongPlayer.EVENTS.FINISH:
         ref = this[dispatchOnFinishHandlers];
         break;
@@ -117,13 +127,13 @@ export class PlayAlongPlayer {
     }
   }
 
-  countingStarted() {}
-
-  countingFinished() {}
-
   setVolume(volume: number) {}
 
   getVolume() { return 0 }
+
+  getInnerPlayer() {
+    return this.innerPlayer;
+  }
 
   private setInnerPlayer(innerPlayer: string) {
     this.innerPlayer = innerPlayer;
