@@ -40,6 +40,8 @@ export class Reproduction {
   private songTempo: number;
   private state: number;
   private interval: ReturnType<typeof setInterval> | null;
+  private loopInterval: ReturnType<typeof setInterval> | null;
+  private loopRange: { from: number; to: number } | null;
   private countingInCounter: number;
 
   private [dispatchOnReadyHandlers]: Handler[];
@@ -66,6 +68,8 @@ export class Reproduction {
 
     this.state = Reproduction.STATES.STOPPED;
     this.interval = null;
+    this.loopInterval = null;
+    this.loopRange = null;
 
     this.requiresCountingIn = requiresCountingIn;
     this.countingInCounter = 0;
@@ -79,6 +83,9 @@ export class Reproduction {
     this.player.on(PLAYER_EVENTS.FINISH, () => {
       this.state = Reproduction.STATES.STOPPED;
       clearInterval(this.interval as NodeJS.Timeout);
+      clearInterval(this.loopInterval as NodeJS.Timeout);
+      this.loopInterval = null;
+      this.loopRange = null;
       this.dispatch(Reproduction.EVENTS.FINISH);
     });
     this.player.on(PLAYER_EVENTS.ERROR, (error: any) => {
@@ -171,6 +178,8 @@ export class Reproduction {
   }
 
   play() {
+    clearInterval(this.interval as NodeJS.Timeout);
+
     this.player.play();
 
     const intervalTimeout = 200;
@@ -182,10 +191,44 @@ export class Reproduction {
     }, intervalTimeout);
   }
 
+  playLoop(from: number, to: number) {
+    if (!Number.isFinite(from) || !Number.isFinite(to)) {
+      return;
+    }
+
+    if (to <= from) {
+      return;
+    }
+
+    clearInterval(this.loopInterval as NodeJS.Timeout);
+    this.loopInterval = null;
+
+    this.loopRange = { from, to };
+
+    this.seekTo(from);
+    this.play();
+
+    const loopCheckInterval = 100;
+
+    this.loopInterval = setInterval(() => {
+      if (!this.isPlaying() || !this.loopRange) {
+        return;
+      }
+
+      const currentTime = this.getCurrentTime();
+      if (currentTime >= this.loopRange.to) {
+        this.seekTo(this.loopRange.from);
+      }
+    }, loopCheckInterval);
+  }
+
   pause() {
     this.state = Reproduction.STATES.PAUSED;
     this.player.pause();
     clearInterval(this.interval as NodeJS.Timeout);
+    clearInterval(this.loopInterval as NodeJS.Timeout);
+    this.loopInterval = null;
+    this.loopRange = null;
 
     this.dispatch(Reproduction.EVENTS.PAUSED);
   }
@@ -194,6 +237,9 @@ export class Reproduction {
     this.state = Reproduction.STATES.STOPPED;
     this.player.stop();
     clearInterval(this.interval as NodeJS.Timeout);
+    clearInterval(this.loopInterval as NodeJS.Timeout);
+    this.loopInterval = null;
+    this.loopRange = null;
     this.dispatch(Reproduction.EVENTS.FINISH);
   }
 
@@ -262,8 +308,6 @@ export class Reproduction {
   getBPMInterval() {
     return 60000 / this.getTempo();
   }
-
-
 
   private countInAndPlay(timeout: number, limit: number) {
     // the initial count starts instantly, no need to wait
