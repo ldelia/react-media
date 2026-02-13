@@ -50,6 +50,12 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
     }
   };
 
+  const handleLoop = () => {
+    if (reproduction) {
+      reproduction.playLoop(10, 20);
+    }
+  };
+
   return (
     <div>
       <ReproductionWidget
@@ -68,6 +74,9 @@ const Template: StoryFn<ReproductionWidgetProps> = (args: ReproductionWidgetProp
         </button>
         <button onClick={handleStart} disabled={!reproduction || reproduction.isPlaying()}>
           Start
+        </button>
+        <button onClick={handleLoop} disabled={!reproduction}>
+          Loop 10-20
         </button>
         {reproduction && (
           <div>Current time: {reproduction?.getCurrentTime()}</div>
