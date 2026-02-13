@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { Timeline, TimelineProps } from '../components/timeline';
-import { Meta, StoryFn } from '@storybook/react-webpack5';
+import type { Meta, StoryFn } from '@storybook/react';
 import styled from 'styled-components';
+import { Timeline, TimelineProps } from '../components/timeline';
 
 import './timeline.stories.custom.css';
 
@@ -72,5 +72,5 @@ WithSelectedRangeAndMarkers.args = {
   value: 31,
   zoomLevel: 0,
   selectedRange: [20, 30],
-  markers: [90,108],
+  markers: [90, 108],
 };
