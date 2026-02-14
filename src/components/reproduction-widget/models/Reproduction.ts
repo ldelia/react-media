@@ -5,12 +5,14 @@ import { YouTubePlayer } from './Player/YouTubePlayer';
 
 type Player = PlayAlongPlayer | YouTubePlayer;
 
-const STATES = {
+export const REPRODUCTION_STATES = {
   STOPPED: 0,
   COUNTING_IN: 1,
   PLAYING: 2,
   PAUSED: 3,
 };
+
+type ReproductionState = (typeof REPRODUCTION_STATES)[keyof typeof REPRODUCTION_STATES];
 
 const EVENTS = {
   START: 'START',
@@ -34,11 +36,11 @@ const dispatchOnFinishHandlers = Symbol();
 const dispatchOnErrorHandlers = Symbol();
 
 export class Reproduction {
-  private player: Player;
-  private requiresCountingIn: boolean;
+  private readonly player: Player;
+  private readonly requiresCountingIn: boolean;
+  private readonly songTempo: number;
 
-  private songTempo: number;
-  private state: number;
+  private state: ReproductionState;
   private interval: ReturnType<typeof setInterval> | null;
   private loopInterval: ReturnType<typeof setInterval> | null;
   private loopRange: { from: number; to: number } | null;
@@ -98,31 +100,83 @@ export class Reproduction {
   }
 
   static get STATES() {
-    return STATES;
+    return REPRODUCTION_STATES;
   }
 
   static newBuilder() {
     return new ReproductionBuilder();
   }
 
-  on(eventName: keyof typeof Reproduction.EVENTS, handler: Handler) {
+  on(eventName: keyof typeof Reproduction.EVENTS, handler: Handler): () => void {
+    if (typeof handler !== 'function') {
+      throw new Error('Handler must be a function');
+    }
+
     switch (eventName) {
       case Reproduction.EVENTS.START:
-        return this[dispatchOnSongStartHandlers].push(handler);
-      case Reproduction.EVENTS.COUNTING_IN:
-        return this[dispatchOnCountingInHandlers].push(handler);
-      case Reproduction.EVENTS.PLAY:
-        return this[dispatchOnPlayHandlers].push(handler);
-      case Reproduction.EVENTS.PLAYING:
-        return this[dispatchOnPlayingHandlers].push(handler);
-      case Reproduction.EVENTS.PAUSED:
-        return this[dispatchOnPausedHandlers].push(handler);
-      case Reproduction.EVENTS.FINISH:
-        return this[dispatchOnFinishHandlers].push(handler);
-      case Reproduction.EVENTS.ERROR:
-        return this[dispatchOnErrorHandlers].push(handler);
-      default:
+        this[dispatchOnSongStartHandlers].push(handler);
         break;
+      case Reproduction.EVENTS.COUNTING_IN:
+        this[dispatchOnCountingInHandlers].push(handler);
+        break;
+      case Reproduction.EVENTS.PLAY:
+        this[dispatchOnPlayHandlers].push(handler);
+        break;
+      case Reproduction.EVENTS.PLAYING:
+        this[dispatchOnPlayingHandlers].push(handler);
+        break;
+      case Reproduction.EVENTS.PAUSED:
+        this[dispatchOnPausedHandlers].push(handler);
+        break;
+      case Reproduction.EVENTS.FINISH:
+        this[dispatchOnFinishHandlers].push(handler);
+        break;
+      case Reproduction.EVENTS.ERROR:
+        this[dispatchOnErrorHandlers].push(handler);
+        break;
+      default:
+        throw new Error(`Unknown event: ${eventName}`);
+    }
+
+    return () => this.off(eventName, handler);
+  }
+
+  off(eventName: keyof typeof Reproduction.EVENTS, handler: Handler): void {
+    if (typeof handler !== 'function') {
+      throw new Error('Handler must be a function');
+    }
+
+    let handlers: Handler[];
+    
+    switch (eventName) {
+      case Reproduction.EVENTS.START:
+        handlers = this[dispatchOnSongStartHandlers];
+        break;
+      case Reproduction.EVENTS.COUNTING_IN:
+        handlers = this[dispatchOnCountingInHandlers];
+        break;
+      case Reproduction.EVENTS.PLAY:
+        handlers = this[dispatchOnPlayHandlers];
+        break;
+      case Reproduction.EVENTS.PLAYING:
+        handlers = this[dispatchOnPlayingHandlers];
+        break;
+      case Reproduction.EVENTS.PAUSED:
+        handlers = this[dispatchOnPausedHandlers];
+        break;
+      case Reproduction.EVENTS.FINISH:
+        handlers = this[dispatchOnFinishHandlers];
+        break;
+      case Reproduction.EVENTS.ERROR:
+        handlers = this[dispatchOnErrorHandlers];
+        break;
+      default:
+        throw new Error(`Unknown event: ${eventName}`);
+    }
+
+    const index = handlers.indexOf(handler);
+    if (index > -1) {
+      handlers.splice(index, 1);
     }
   }
 
@@ -181,14 +235,15 @@ export class Reproduction {
     clearInterval(this.interval as NodeJS.Timeout);
 
     this.player.play();
-
-    const intervalTimeout = 200;
+    
+    const bpmInterval = this.getBPMInterval();
+    const tickInterval = Math.min(bpmInterval / 4, 50);
 
     this.interval = setInterval(() => {
       if (this.isPlaying()) {
         this.dispatch(Reproduction.EVENTS.PLAYING);
       }
-    }, intervalTimeout);
+    }, tickInterval);
   }
 
   playLoop(from: number, to: number) {
@@ -257,6 +312,10 @@ export class Reproduction {
 
   isCountingIn() {
     return this.state === Reproduction.STATES.COUNTING_IN;
+  }
+
+  getState(): ReproductionState {
+    return this.state;
   }
 
   getPlayer() {
