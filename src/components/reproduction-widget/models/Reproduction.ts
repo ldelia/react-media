@@ -5,12 +5,14 @@ import { YouTubePlayer } from './Player/YouTubePlayer';
 
 type Player = PlayAlongPlayer | YouTubePlayer;
 
-const STATES = {
+export const REPRODUCTION_STATES = {
   STOPPED: 0,
   COUNTING_IN: 1,
   PLAYING: 2,
   PAUSED: 3,
 };
+
+type ReproductionState = (typeof REPRODUCTION_STATES)[keyof typeof REPRODUCTION_STATES];
 
 const EVENTS = {
   START: 'START',
@@ -34,11 +36,11 @@ const dispatchOnFinishHandlers = Symbol();
 const dispatchOnErrorHandlers = Symbol();
 
 export class Reproduction {
-  private player: Player;
-  private requiresCountingIn: boolean;
+  private readonly player: Player;
+  private readonly requiresCountingIn: boolean;
+  private readonly songTempo: number;
 
-  private songTempo: number;
-  private state: number;
+  private state: ReproductionState;
   private interval: ReturnType<typeof setInterval> | null;
   private loopInterval: ReturnType<typeof setInterval> | null;
   private loopRange: { from: number; to: number } | null;
@@ -98,7 +100,7 @@ export class Reproduction {
   }
 
   static get STATES() {
-    return STATES;
+    return REPRODUCTION_STATES;
   }
 
   static newBuilder() {
@@ -257,6 +259,10 @@ export class Reproduction {
 
   isCountingIn() {
     return this.state === Reproduction.STATES.COUNTING_IN;
+  }
+
+  getState(): ReproductionState {
+    return this.state;
   }
 
   getPlayer() {
