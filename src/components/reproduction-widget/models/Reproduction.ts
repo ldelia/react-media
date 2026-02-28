@@ -12,7 +12,8 @@ export const REPRODUCTION_STATES = {
   PAUSED: 3,
 };
 
-type ReproductionState = (typeof REPRODUCTION_STATES)[keyof typeof REPRODUCTION_STATES];
+type ReproductionState =
+  (typeof REPRODUCTION_STATES)[keyof typeof REPRODUCTION_STATES];
 
 const EVENTS = {
   START: 'START',
@@ -26,7 +27,6 @@ const EVENTS = {
 
 type Handler = (args: object) => void;
 
-const dispatchOnReadyHandlers = Symbol();
 const dispatchOnSongStartHandlers = Symbol();
 const dispatchOnCountingInHandlers = Symbol();
 const dispatchOnPlayHandlers = Symbol();
@@ -46,7 +46,6 @@ export class Reproduction {
   private loopRange: { from: number; to: number } | null;
   private countingInCounter: number;
 
-  private [dispatchOnReadyHandlers]: Handler[];
   private [dispatchOnSongStartHandlers]: Handler[];
   private [dispatchOnCountingInHandlers]: Handler[];
   private [dispatchOnPlayHandlers]: Handler[];
@@ -55,8 +54,12 @@ export class Reproduction {
   private [dispatchOnFinishHandlers]: Handler[];
   private [dispatchOnErrorHandlers]: Handler[];
 
-  constructor(player: Player, requiresCountingIn: boolean, songTempo: number, volume: number) {
-    this[dispatchOnReadyHandlers] = [];
+  constructor(
+    player: Player,
+    requiresCountingIn: boolean,
+    songTempo: number,
+    volume: number,
+  ) {
     this[dispatchOnSongStartHandlers] = [];
     this[dispatchOnCountingInHandlers] = [];
     this[dispatchOnPlayHandlers] = [];
@@ -107,7 +110,10 @@ export class Reproduction {
     return new ReproductionBuilder();
   }
 
-  on(eventName: keyof typeof Reproduction.EVENTS, handler: Handler): () => void {
+  on(
+    eventName: keyof typeof Reproduction.EVENTS,
+    handler: Handler,
+  ): () => void {
     if (typeof handler !== 'function') {
       throw new Error('Handler must be a function');
     }
@@ -147,7 +153,7 @@ export class Reproduction {
     }
 
     let handlers: Handler[];
-    
+
     switch (eventName) {
       case Reproduction.EVENTS.START:
         handlers = this[dispatchOnSongStartHandlers];
@@ -235,7 +241,7 @@ export class Reproduction {
     clearInterval(this.interval as NodeJS.Timeout);
 
     this.player.play();
-    
+
     const bpmInterval = this.getBPMInterval();
     const tickInterval = Math.min(bpmInterval / 4, 50);
 
@@ -247,18 +253,12 @@ export class Reproduction {
   }
 
   playLoop(from: number, to: number) {
-    if (!Number.isFinite(from) || !Number.isFinite(to)) {
-      return;
-    }
-
-    if (to <= from) {
+    if (!this.setLoopRange(from, to)) {
       return;
     }
 
     clearInterval(this.loopInterval as NodeJS.Timeout);
     this.loopInterval = null;
-
-    this.loopRange = { from, to };
 
     this.seekTo(from);
     this.play();
@@ -352,6 +352,15 @@ export class Reproduction {
     this.player.setVolume(volume);
   }
 
+  setLoopRange(from: number, to: number): boolean {
+    if (!Number.isFinite(from) || !Number.isFinite(to) || to <= from) {
+      return false;
+    }
+
+    this.loopRange = { from, to };
+    return true;
+  }
+
   getAvailablePlaybackRates() {
     return this.player.getAvailablePlaybackRates();
   }
@@ -371,7 +380,9 @@ export class Reproduction {
   private countInAndPlay(timeout: number, limit: number) {
     // the initial count starts instantly, no need to wait
     this.countingInCounter++;
-    this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
+    this.dispatch(Reproduction.EVENTS.COUNTING_IN, {
+      countingInCounter: this.countingInCounter,
+    });
 
     const interval = setInterval(() => {
       this.countingInCounter++;
@@ -384,7 +395,9 @@ export class Reproduction {
           this.play();
         }
       } else {
-        this.dispatch(Reproduction.EVENTS.COUNTING_IN, {countingInCounter: this.countingInCounter});
+        this.dispatch(Reproduction.EVENTS.COUNTING_IN, {
+          countingInCounter: this.countingInCounter,
+        });
       }
     }, timeout);
   }
