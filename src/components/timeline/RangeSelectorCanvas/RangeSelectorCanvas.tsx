@@ -68,7 +68,7 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     context.globalAlpha = 1.0;
   };
 
-  // Check if mouse is near the start or end edge of the selection
+  // Check if the mouse pointer is near the start or end edge of the selection
   const isNearSelectionEdge = (
     pixel: number,
   ): { isNear: boolean; edge: 'start' | 'end' | null } => {
@@ -238,4 +238,16 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
   );
 };
 
-export default React.memo(RangeSelectorCanvas);
+const areEqual = (
+  prevProps: RangeSelectorCanvasProps,
+  nextProps: RangeSelectorCanvasProps,
+) => {
+  return (
+    prevProps.selectedRange[0] === nextProps.selectedRange[0] &&
+    prevProps.selectedRange[1] === nextProps.selectedRange[1] &&
+    prevProps.onChange === nextProps.onChange &&
+    prevProps.onRangeChange === nextProps.onRangeChange
+  );
+};
+
+export default React.memo(RangeSelectorCanvas, areEqual);
