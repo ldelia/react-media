@@ -9,8 +9,8 @@ describe('Timeline', () => {
     props = {
       duration: 300,
       value: 15,
-      onChange: jest.fn(),
-      onRangeChange: jest.fn(),
+      onChange: vitest.fn(),
+      onRangeChange: vitest.fn(),
       zoomLevel: 0,
     };
   });

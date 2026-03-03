@@ -12,7 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true, // Generate .d.ts files
-    "declarationDir": "./dist" // Directory to output .d.ts files
+    "declarationDir": "./dist", // Directory to output .d.ts files
+    "types": ["youtube", "vitest/globals"]
   },
   "include": ["src", ".storybook", "src/react-docgen-types.d.ts"]
 }
