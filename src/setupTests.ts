@@ -1,5 +1,18 @@
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
+HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+  beginPath: vi.fn(),
+  clearRect: vi.fn(),
+  fillRect: vi.fn(),
+  strokeRect: vi.fn(),
+  moveTo: vi.fn(),
+  lineTo: vi.fn(),
+  stroke: vi.fn(),
+  fill: vi.fn(),
+  arc: vi.fn(),
+  fillText: vi.fn(),
+  measureText: vi.fn().mockReturnValue({ width: 0 }),
+  save: vi.fn(),
+  restore: vi.fn(),
+  scale: vi.fn(),
+  translate: vi.fn(),
+  setTransform: vi.fn(),
+});

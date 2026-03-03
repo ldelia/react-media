@@ -9,18 +9,20 @@ describe('Timeline', () => {
     props = {
       duration: 300,
       value: 15,
-      onChange: jest.fn(),
-      onRangeChange: jest.fn(),
+      onChange: vitest.fn(),
+      onRangeChange: vitest.fn(),
       zoomLevel: 0,
     };
   });
 
   describe('render()', () => {
-    it('renders a timeline', () => {
+    it('renders a timeline', async () => {
       const rootElement = document.createElement('div');
-
       const root = createRoot(rootElement);
+
       root.render(<Timeline {...props} />);
+
+      root.unmount();
     });
   });
 });
