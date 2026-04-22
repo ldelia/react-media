@@ -1,10 +1,6 @@
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  getComputedElementWidth,
-  numberToPxString,
-  secondsToPixel,
-} from '../utils/utils';
+import { getComputedElementWidth, numberToPxString, secondsToPixel } from '../utils/utils';
 import { ZoomContext, ZoomContextType } from '../ZoomContext/ZoomContext';
 
 const PreValueLine = styled.span`
@@ -27,7 +23,7 @@ const PostValueLine = styled.span`
 `;
 
 interface Props {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
   value: number;
 }
 
@@ -38,7 +34,8 @@ export const TimelineValue: React.FC<Props> = ({ canvasRef, value }) => {
 
   const zoomContextValue: ZoomContextType = useContext(ZoomContext);
 
-  const showValueLine = useCallback(() => {
+  useEffect(() => {
+    // removed useCallback because we noticed that on QA the component was not re-rendering when the value changed
     const canvas: HTMLCanvasElement = canvasRef.current!;
 
     const preValueLineElement: HTMLElement = preValueLineRef.current!;
@@ -47,8 +44,10 @@ export const TimelineValue: React.FC<Props> = ({ canvasRef, value }) => {
 
     const valueLineWidth: number = getComputedElementWidth(valueLineElement);
     const linePosition: number = secondsToPixel(zoomContextValue, value);
-    const valueLinePositionBeginningConsideringWidth: number =
-      Math.max(linePosition - valueLineWidth / 2, 0);
+    const valueLinePositionBeginningConsideringWidth: number = Math.max(
+      linePosition - valueLineWidth / 2,
+      0,
+    );
 
     // configure preValueLineElement
     preValueLineElement.style.width = numberToPxString(
@@ -67,10 +66,6 @@ export const TimelineValue: React.FC<Props> = ({ canvasRef, value }) => {
     postValueLineElement.style.left = numberToPxString(postValueLinePosition);
     postValueLineElement.style.width = numberToPxString(postValueLineWidth);
   }, [canvasRef, value, zoomContextValue]);
-
-  useEffect(() => {
-    showValueLine();
-  }, [showValueLine]);
 
   return (
     <>

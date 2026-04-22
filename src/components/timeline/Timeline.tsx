@@ -55,7 +55,7 @@ export const Timeline: React.FC<TimelineProps> = ({
   className = '',
 }) => {
   const timeLineContainerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [zoomContextValue, setZoomContextValue] = useState<ZoomContextType>({
     blockOffset: 0,
