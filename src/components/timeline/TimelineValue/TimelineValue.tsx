@@ -23,7 +23,7 @@ const PostValueLine = styled.span`
 `;
 
 interface Props {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
   value: number;
 }
 
