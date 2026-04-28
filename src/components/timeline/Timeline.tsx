@@ -73,8 +73,10 @@ export const Timeline: React.FC<TimelineProps> = ({
     console.warn('Invalid value.');
   }
 
+  let validatedSelectedRange = selectedRange;
+
   if (!(selectedRange.length === 0 || selectedRange.length === 2)) {
-    selectedRange = [];
+    validatedSelectedRange = [];
     console.warn('The selected range must contain only two values.');
   }
 
@@ -86,7 +88,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       selectedRange[1] <= duration
     )
   ) {
-    selectedRange = [];
+    validatedSelectedRange = [];
     console.warn('The selected range is inconsistent.');
   }
 
@@ -132,7 +134,7 @@ export const Timeline: React.FC<TimelineProps> = ({
           <TimelineValue value={value} canvasRef={canvasRef} />
           <TimelineMarkers markers={markers} />
           <RangeSelectorCanvas
-            selectedRange={selectedRange}
+            selectedRange={validatedSelectedRange}
             onChange={onChange}
             onRangeChange={onRangeChange}
           />

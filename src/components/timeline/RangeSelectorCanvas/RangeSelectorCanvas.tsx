@@ -242,12 +242,20 @@ const areEqual = (
   prevProps: RangeSelectorCanvasProps,
   nextProps: RangeSelectorCanvasProps,
 ) => {
-  return (
-    prevProps.selectedRange[0] === nextProps.selectedRange[0] &&
-    prevProps.selectedRange[1] === nextProps.selectedRange[1] &&
-    prevProps.onChange === nextProps.onChange &&
-    prevProps.onRangeChange === nextProps.onRangeChange
-  );
+  const prevLength = prevProps.selectedRange.length;
+  const nextLength = nextProps.selectedRange.length;
+  
+  if (prevLength !== nextLength) return false;
+  if (prevLength === 0) return true;
+  if (prevLength === 2) {
+    return (
+      prevProps.selectedRange[0] === nextProps.selectedRange[0] &&
+      prevProps.selectedRange[1] === nextProps.selectedRange[1] &&
+      prevProps.onChange === nextProps.onChange &&
+      prevProps.onRangeChange === nextProps.onRangeChange
+    );
+  }
+  return false;
 };
 
 export default React.memo(RangeSelectorCanvas, areEqual);
