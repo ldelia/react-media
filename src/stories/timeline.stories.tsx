@@ -70,13 +70,23 @@ const PlaybackSimulation: StoryFn<TimelineProps> = (args: TimelineProps) => {
     setSelectedRange(values);
   };
 
+  const handleSetRange10_20 = () => {
+    setSelectedRange([10, 20]);
+  };
+
+  const handleSetRange40_50 = () => {
+    setSelectedRange([40, 50]);
+  };
+
   return (
     <div>
       <div style={{ marginBottom: '10px' }}>
         <button onClick={handlePlayPause} style={{ marginRight: '10px' }}>
           {isPlaying ? 'Pause' : 'Play'}
         </button>
-        <button onClick={handleReset}>Reset</button>
+        <button onClick={handleReset} style={{ marginRight: '10px' }}>Reset</button>
+        <button onClick={handleSetRange10_20} style={{ marginRight: '10px' }}>Set Range [10, 20]</button>
+        <button onClick={handleSetRange40_50} style={{ marginRight: '20px' }}>Set Range [40, 50]</button>
         <span style={{ marginLeft: '20px' }}>
           Time: {currentValue.toFixed(2)}s / {args.duration}s
         </span>
@@ -88,6 +98,7 @@ const PlaybackSimulation: StoryFn<TimelineProps> = (args: TimelineProps) => {
       <StyledTimeline
         {...args}
         value={currentValue}
+        selectedRange={selectedRange || []}
         onChange={(value) => {
           setCurrentValue(value);
           args.onChange?.(value);
