@@ -157,6 +157,9 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
         ];
         onRangeChange(curatedSelection);
       }
+      setSelection({ start: null, end: null });
+    } else {
+      setSelection({ start: null, end: null });
     }
 
     setDragMode(DragMode.NONE);
@@ -200,31 +203,25 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 
-    if (
-      selectedRange.length !== 2 ||
-      zoomContextValue.timelineWrapperWidth === 0
-    )
+    if (zoomContextValue.timelineWrapperWidth === 0) return;
+
+    // Draw selection being dragged (takes priority)
+    if (dragMode !== DragMode.NONE && selection.start !== null && selection.end !== null) {
+      drawRect(
+        secondsToPixel(zoomContextValue, selection.start),
+        secondsToPixel(zoomContextValue, selection.end),
+      );
       return;
-    drawRect(
-      secondsToPixel(zoomContextValue, selectedRange[0]),
-      secondsToPixel(zoomContextValue, selectedRange[1]),
-    );
-  }, [selectedRange, zoomContextValue]);
+    }
 
-  useEffect(() => {
-    const canvas: HTMLCanvasElement = canvasRef.current!;
-
-    // https://stackoverflow.com/questions/8696631/canvas-drawings-like-lines-are-blurry
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-
-    if (selection.start === null || selection.end === null) return;
-
-    drawRect(
-      secondsToPixel(zoomContextValue, selection.start),
-      secondsToPixel(zoomContextValue, selection.end),
-    );
-  }, [selection, zoomContextValue]);
+    // Draw selectedRange from props
+    if (selectedRange.length === 2) {
+      drawRect(
+        secondsToPixel(zoomContextValue, selectedRange[0]),
+        secondsToPixel(zoomContextValue, selectedRange[1]),
+      );
+    }
+  }, [selectedRange, selection, dragMode, zoomContextValue]);
 
   return (
     <OverlayCanvas
