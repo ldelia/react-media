@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import type { Meta, StoryFn } from '@storybook/react';
 import styled from 'styled-components';
-import { Timeline, TimelineProps } from '../components/timeline';
+import { Reproduction, Timeline, TimelineProps } from '../components';
 
 import './timeline.stories.custom.css';
 
@@ -30,69 +30,113 @@ const PlaybackSimulation: StoryFn<TimelineProps> = (args: TimelineProps) => {
   const [currentValue, setCurrentValue] = useState(args.value || 0);
   const [selectedRange, setSelectedRange] = useState<number[] | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [loopRange, setLoopRangeState] = useState<{ from: number; to: number } | null>(null);
+  const reproductionRef = useRef<Reproduction | null>(null);
 
   useEffect(() => {
-    if (isPlaying && currentValue < args.duration) {
-      intervalRef.current = setInterval(() => {
-        setCurrentValue((prev) => {
-          const next = prev + 0.05; // Advance 50ms (0.05 seconds)
-          return next >= args.duration ? args.duration : next;
-        });
-      }, 50); // Update every 50ms
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }
+    const reproduction = Reproduction.newBuilder()
+      .withSongDuration(args.duration)
+      .withSongTempo(120)
+      .withInnerPlayer('story-player')
+      .withCountingIn(false)
+      .withVolume(50)
+      .createReproduction();
+
+    reproductionRef.current = reproduction;
+
+    const unsubPlay = reproduction.on(Reproduction.EVENTS.PLAY, () => {
+      setIsPlaying(true);
+    });
+
+    const unsubPlaying = reproduction.on(Reproduction.EVENTS.PLAYING, () => {
+      setCurrentValue(reproduction.getCurrentTime());
+    });
+
+    const unsubPaused = reproduction.on(Reproduction.EVENTS.PAUSED, () => {
+      setIsPlaying(false);
+      setLoopRangeState(null);
+    });
+
+    const unsubFinish = reproduction.on(Reproduction.EVENTS.FINISH, () => {
+      setIsPlaying(false);
+      setLoopRangeState(null);
+      setCurrentValue(0);
+    });
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      unsubPlay();
+      unsubPlaying();
+      unsubPaused();
+      unsubFinish();
+      reproduction.stop();
     };
-  }, [isPlaying, currentValue, args.duration]);
+  }, [args.duration]);
 
   const handlePlayPause = () => {
-    if (currentValue >= args.duration) {
-      setCurrentValue(0); // Reset to beginning if we reached the end
+    const reproduction = reproductionRef.current;
+    if (!reproduction) return;
+
+    if (isPlaying) {
+      reproduction.pause();
+    } else if (selectedRange) {
+      reproduction.playLoop(selectedRange[0], selectedRange[1]);
+      setLoopRangeState({ from: selectedRange[0], to: selectedRange[1] });
+    } else {
+      if (reproduction.isStopped()) {
+        reproduction.start();
+      } else {
+        reproduction.play();
+      }
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleReset = () => {
-    setIsPlaying(false);
-    setCurrentValue(0);
+    reproductionRef.current?.stop();
   };
 
   const onRangeChangeHandler = (values: number[]) => {
     setSelectedRange(values);
   };
 
-  const handleSetRange10_20 = () => {
-    setSelectedRange([10, 20]);
+  const handleClearRange = () => {
+    setSelectedRange(null);
   };
 
-  const handleSetRange40_50 = () => {
-    setSelectedRange([40, 50]);
+  const handleSetLoopRange0_10 = () => {
+    const reproduction = reproductionRef.current;
+    if (!reproduction) return;
+    reproduction.setLoopRange(0, 10);
+    setLoopRangeState({ from: 0, to: 10 });
+    setSelectedRange([0, 10]);
+  };
+
+  const handleSetLoopRange40_60 = () => {
+    const reproduction = reproductionRef.current;
+    if (!reproduction) return;
+    reproduction.setLoopRange(40, 60);
+    setLoopRangeState({ from: 40, to: 60 });
+    setSelectedRange([40, 60]);
   };
 
   return (
     <div>
       <div style={{ marginBottom: '10px' }}>
         <button onClick={handlePlayPause} style={{ marginRight: '10px' }}>
-          {isPlaying ? 'Pause' : 'Play'}
+          {isPlaying ? 'Pause' : selectedRange ? 'Play Loop' : 'Play'}
         </button>
         <button onClick={handleReset} style={{ marginRight: '10px' }}>Reset</button>
-        <button onClick={handleSetRange10_20} style={{ marginRight: '10px' }}>Set Range [10, 20]</button>
-        <button onClick={handleSetRange40_50} style={{ marginRight: '20px' }}>Set Range [40, 50]</button>
+        <button onClick={handleClearRange} style={{ marginRight: '10px' }}>Clear Range</button>
+        <button onClick={handleSetLoopRange0_10} style={{ marginRight: '10px' }}>setLoopRange(0, 10)</button>
+        <button onClick={handleSetLoopRange40_60} style={{ marginRight: '20px' }}>setLoopRange(40, 60)</button>
         <span style={{ marginLeft: '20px' }}>
           Time: {currentValue.toFixed(2)}s / {args.duration}s
         </span>
         <span style={{ marginLeft: '20px' }}>
           Selected range:{' '}
           {selectedRange ? `${selectedRange[0]}-${selectedRange[1]}` : 'N/A'}
+        </span>
+        <span style={{ marginLeft: '20px' }}>
+          Loop: {loopRange ? `${loopRange.from}-${loopRange.to}` : 'Off'}
         </span>
       </div>
       <StyledTimeline
@@ -101,6 +145,7 @@ const PlaybackSimulation: StoryFn<TimelineProps> = (args: TimelineProps) => {
         selectedRange={selectedRange || []}
         onChange={(value) => {
           setCurrentValue(value);
+          reproductionRef.current?.seekTo(value);
           args.onChange?.(value);
         }}
         onRangeChange={onRangeChangeHandler}
