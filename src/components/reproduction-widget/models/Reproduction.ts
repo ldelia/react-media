@@ -358,6 +358,14 @@ export class Reproduction {
     }
 
     this.loopRange = { from, to };
+
+    if (this.loopInterval && this.isPlaying()) {
+      const currentTime = this.getCurrentTime();
+      if (currentTime < from || currentTime >= to) {
+        this.seekTo(from);
+      }
+    }
+
     return true;
   }
 
