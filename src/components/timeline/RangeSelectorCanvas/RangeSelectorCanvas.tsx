@@ -11,6 +11,7 @@ const OverlayCanvas = styled.canvas`
   height: 100%;
   color: cadetblue;
   cursor: pointer;
+  touch-action: none;
   z-index: 2; // Ensure this canvas is on top of the TimeLineValue, otherwise, we won't be able to change the range until the current TimelineValue position
 `;
 
@@ -32,7 +33,7 @@ export interface RangeSelectorCanvasProps {
   onRangeChange: (value: number[]) => void;
 }
 
-const RESIZE_HANDLE_WIDTH = 10; // Width in pixels for the resize handle detection zone
+const RESIZE_HANDLE_WIDTH = 16; // Width in pixels for the resize handle detection zone (touch-friendly)
 
 const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
   selectedRange,
@@ -49,7 +50,7 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
   const [dragMode, setDragMode] = useState<DragMode>(DragMode.NONE);
   const [cursorStyle, setCursorStyle] = useState<string>('pointer');
 
-  const getMousePointerPixelPosition = (e: { clientX: number }) => {
+  const getPointerPixelPosition = (e: { clientX: number }) => {
     const canvas: HTMLCanvasElement = canvasRef.current!;
     let rect = canvas.getBoundingClientRect();
     return e.clientX - rect.left;
@@ -68,7 +69,7 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     context.globalAlpha = 1.0;
   };
 
-  // Check if the mouse pointer is near the start or end edge of the selection
+  // Check if the pointer is near the start or end edge of the selection
   const isNearSelectionEdge = (
     pixel: number,
   ): { isNear: boolean; edge: 'start' | 'end' | null } => {
@@ -86,9 +87,11 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     return { isNear: false, edge: null };
   };
 
-  // Handle mouse move for cursor style when not dragging
-  const handleMouseOver = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const pixel = getMousePointerPixelPosition(event);
+  // Update cursor style when hovering near resize handles (mouse only)
+  const updateCursorStyle = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (event.pointerType === 'touch') return;
+
+    const pixel = getPointerPixelPosition(event);
     const { isNear } = isNearSelectionEdge(pixel);
 
     if (isNear) {
@@ -98,12 +101,18 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     }
   };
 
-  // Handle mouse down (start of selection or resize)
-  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  // Handle pointer down (start of selection or resize)
+  const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    // Ignore non-primary pointers (multi-touch) and non-primary mouse buttons.
+    // Treat missing isPrimary as primary for environments that omit it (e.g. jsdom).
+    if (event.isPrimary === false || event.button > 0) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const pixel = getMousePointerPixelPosition(event);
+    canvas.setPointerCapture?.(event.pointerId);
+
+    const pixel = getPointerPixelPosition(event);
     const second = pixelToSeconds(zoomContextValue, pixel);
     const { isNear, edge } = isNearSelectionEdge(pixel);
 
@@ -119,17 +128,23 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     }
   };
 
-  // Handle mouse up (end of selection/resize or single click)
-  const handleMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  // Handle pointer up / cancel (end of selection/resize or single tap)
+  const finishPointerInteraction = (
+    event: React.PointerEvent<HTMLCanvasElement>,
+  ) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const pixel = getMousePointerPixelPosition(event);
+    if (canvas.hasPointerCapture?.(event.pointerId)) {
+      canvas.releasePointerCapture?.(event.pointerId);
+    }
+
+    const pixel = getPointerPixelPosition(event);
     const seconds = pixelToSeconds(zoomContextValue, pixel);
 
     if (dragMode === DragMode.CREATE) {
       if (selection.start === seconds) {
-        // Single click
+        // Single click / tap
         onChange(seconds);
         setSelection({ start: null, end: null });
       } else {
@@ -165,17 +180,30 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
     setDragMode(DragMode.NONE);
   };
 
-  // Handle mouse move (for dragging)
-  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    // Update cursor first (always check this regardless of drag state)
-    handleMouseOver(event);
+  const handlePointerUp = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (event.isPrimary === false) return;
+    finishPointerInteraction(event);
+  };
+
+  const handlePointerCancel = (
+    event: React.PointerEvent<HTMLCanvasElement>,
+  ) => {
+    if (event.isPrimary === false) return;
+    finishPointerInteraction(event);
+  };
+
+  // Handle pointer move (for dragging)
+  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (event.isPrimary === false) return;
+
+    updateCursorStyle(event);
 
     if (dragMode === DragMode.NONE) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const pixel = getMousePointerPixelPosition(event);
+    const pixel = getPointerPixelPosition(event);
     const seconds = pixelToSeconds(zoomContextValue, pixel);
 
     if (dragMode === DragMode.CREATE) {
@@ -226,10 +254,11 @@ const RangeSelectorCanvas: React.FC<RangeSelectorCanvasProps> = ({
   return (
     <OverlayCanvas
       ref={canvasRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      style={{ cursor: cursorStyle }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      style={{ cursor: cursorStyle, touchAction: 'none' }}
       className={'media-timeline-range-selector-canvas'}
     />
   );
