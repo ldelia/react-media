@@ -42,13 +42,20 @@ export const YouTubeInnerPlayer = ({ videoId, onReady, onVideoUnavailable }: Pro
     }
   };
 
-  // Reset refs when videoId changes
+  // Reset refs when videoId changes; also clear pending timeout on unmount
   useEffect(() => {
     hasErrorRef.current = false;
     if (readyTimeoutRef.current) {
       clearTimeout(readyTimeoutRef.current);
       readyTimeoutRef.current = null;
     }
+
+    return () => {
+      if (readyTimeoutRef.current) {
+        clearTimeout(readyTimeoutRef.current);
+        readyTimeoutRef.current = null;
+      }
+    };
   }, [videoId]);
 
   return (

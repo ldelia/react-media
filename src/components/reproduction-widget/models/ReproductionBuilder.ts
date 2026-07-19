@@ -1,17 +1,27 @@
-import { InnerYouTubePlayerInterface, YouTubePlayer } from './Player/YouTubePlayer';
+import {
+  InnerYouTubePlayerInterface,
+  YouTubePlayer,
+} from './Player/YouTubePlayer';
+import { InnerMp3PlayerInterface, Mp3Player } from './Player/Mp3Player';
 import { PlayAlongPlayer } from './Player/PlayAlongPlayer';
 import { Reproduction } from './Reproduction';
 
+export type MediaType = 'youtube' | 'mp3' | 'playAlong';
+
 export class ReproductionBuilder {
-  private trainingMode: boolean;
+  private mediaType: MediaType;
   private requiresCountingIn: boolean;
   private songDuration: number | null;
   private songTempo: number | null;
   private volume: number; // between 0 and 100
-  private innerPlayer: InnerYouTubePlayerInterface | string | null;
+  private innerPlayer:
+    | InnerYouTubePlayerInterface
+    | InnerMp3PlayerInterface
+    | string
+    | null;
 
   constructor() {
-    this.trainingMode = false;
+    this.mediaType = 'playAlong';
     this.requiresCountingIn = false;
     this.songDuration = null;
     this.songTempo = null;
@@ -29,8 +39,8 @@ export class ReproductionBuilder {
     return this;
   }
 
-  withTrainingMode(trainingMode: boolean) {
-    this.trainingMode = trainingMode;
+  withMediaType(mediaType: MediaType) {
+    this.mediaType = mediaType;
     return this;
   }
 
@@ -39,7 +49,12 @@ export class ReproductionBuilder {
     return this;
   }
 
-  withInnerPlayer(innerPlayer: InnerYouTubePlayerInterface | string) {
+  withInnerPlayer(
+    innerPlayer:
+      | InnerYouTubePlayerInterface
+      | InnerMp3PlayerInterface
+      | string,
+  ) {
     this.innerPlayer = innerPlayer;
     return this;
   }
@@ -59,19 +74,33 @@ export class ReproductionBuilder {
     }
 
     let player;
-    if (this.trainingMode) {
-      player = new YouTubePlayer(this.innerPlayer as InnerYouTubePlayerInterface);
-    } else {
-      if (this.songDuration === null) {
-        throw new Error('The song duration is mandatory');
-      }
-      player = new PlayAlongPlayer(this.songDuration, this.innerPlayer as string);
+    switch (this.mediaType) {
+      case 'youtube':
+        player = new YouTubePlayer(
+          this.innerPlayer as InnerYouTubePlayerInterface,
+        );
+        break;
+      case 'mp3':
+        player = new Mp3Player(this.innerPlayer as InnerMp3PlayerInterface);
+        break;
+      case 'playAlong':
+        if (this.songDuration === null) {
+          throw new Error('The song duration is mandatory');
+        }
+        player = new PlayAlongPlayer(
+          this.songDuration,
+          this.innerPlayer as string,
+        );
+        break;
+      default:
+        throw new Error(`Unknown media type: ${this.mediaType}`);
     }
+
     return new Reproduction(
       player,
       this.requiresCountingIn,
       this.songTempo || 0,
-      this.volume
+      this.volume,
     );
   }
 }

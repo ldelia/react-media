@@ -2,8 +2,9 @@ import { PLAYER_EVENTS } from './Player/PlayerEvents';
 import { ReproductionBuilder } from './ReproductionBuilder';
 import { PlayAlongPlayer } from './Player/PlayAlongPlayer';
 import { YouTubePlayer } from './Player/YouTubePlayer';
+import { Mp3Player } from './Player/Mp3Player';
 
-type Player = PlayAlongPlayer | YouTubePlayer;
+type Player = PlayAlongPlayer | YouTubePlayer | Mp3Player;
 
 export const REPRODUCTION_STATES = {
   STOPPED: 0,

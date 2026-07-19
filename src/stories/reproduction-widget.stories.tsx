@@ -19,6 +19,7 @@ const Template: StoryFn<ReproductionWidgetProps> = (
 ) => {
   const [reproduction, setReproduction] = useState<Reproduction | null>(null);
   const [reproductionTimestamp, setReproductionTimestamp] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
   // Handle initialization of reproduction
   const handleInit = useCallback((reproductionInstance: Reproduction) => {
@@ -27,6 +28,7 @@ const Template: StoryFn<ReproductionWidgetProps> = (
     };
 
     setReproduction(reproductionInstance);
+    setPlaybackRate(1);
     reproductionInstance.on('COUNTING_IN', (args: any) => {
       console.log('counting in', args);
     });
@@ -67,6 +69,17 @@ const Template: StoryFn<ReproductionWidgetProps> = (
       reproduction.playLoop(10, 20);
     }
   };
+
+  const handlePlaybackRateChange = (playbackRate: number) => {
+    if (reproduction) {
+      reproduction.setPlaybackRate(playbackRate);
+      setPlaybackRate(playbackRate);
+      setReproductionTimestamp(new Date().getTime());
+    }
+  };
+
+  const availablePlaybackRates =
+    reproduction?.getAvailablePlaybackRates() ?? [];
 
   return (
     <div>
@@ -119,6 +132,50 @@ const Template: StoryFn<ReproductionWidgetProps> = (
         >
           Volume +10
         </button>
+        {reproduction && availablePlaybackRates.length > 0 && (
+          <div>
+            <div>Playback rate: {playbackRate}x</div>
+            {availablePlaybackRates.map((rate) => (
+              <button
+                key={rate}
+                onClick={() => handlePlaybackRateChange(rate)}
+                disabled={playbackRate === rate}
+              >
+                {rate}x
+              </button>
+            ))}
+          </div>
+        )}
+        {reproduction && availablePlaybackRates.length === 0 && (
+          <div>
+            <label>
+              Playback rate:{' '}
+              <input
+                type="number"
+                min={0.25}
+                max={4}
+                step={0.05}
+                value={playbackRate}
+                onChange={(event) => {
+                  const nextRate = Number(event.target.value);
+                  if (Number.isFinite(nextRate)) {
+                    handlePlaybackRateChange(nextRate);
+                  }
+                }}
+              />
+              x
+            </label>
+            <div>
+              <button onClick={() => handlePlaybackRateChange(0.85)}>
+                0.85x
+              </button>
+              <button onClick={() => handlePlaybackRateChange(1)}>1x</button>
+              <button onClick={() => handlePlaybackRateChange(1.15)}>
+                1.15x
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -152,4 +209,20 @@ InvalidVideo.args = {
   videoId: 'Y8jDVJrOHvo',
   songTempo: 180,
   onVideoUnavailable: () => console.error('Video unavailable'),
+};
+
+export const Mp3 = Template.bind({});
+Mp3.args = {
+  trainingMode: true,
+  mp3File: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+  songTempo: 180,
+  onMp3Unavailable: () => console.error('MP3 unavailable'),
+};
+
+export const InvalidMp3 = Template.bind({});
+InvalidMp3.args = {
+  trainingMode: true,
+  mp3File: 'https://example.com/invalid-audio-file.mp3',
+  songTempo: 180,
+  onMp3Unavailable: () => console.error('MP3 unavailable'),
 };
