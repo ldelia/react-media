@@ -22,6 +22,28 @@ HTMLCanvasElement.prototype.getContext = vi.fn().mockImplementation(function (
   };
 });
 
+// jsdom does not implement ResizeObserver; provide a minimal polyfill for tests.
+if (typeof window.ResizeObserver === 'undefined') {
+  class ResizeObserverPolyfill {
+    private callback: ResizeObserverCallback;
+
+    constructor(callback: ResizeObserverCallback) {
+      this.callback = callback;
+    }
+
+    observe(): void {
+      // no-op: Timeline also updates zoom context synchronously on mount
+    }
+
+    unobserve(): void {}
+
+    disconnect(): void {}
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).ResizeObserver = ResizeObserverPolyfill;
+}
+
 // jsdom does not implement PointerEvent; provide a minimal polyfill for tests.
 if (typeof window.PointerEvent === 'undefined') {
   class PointerEventPolyfill extends MouseEvent {

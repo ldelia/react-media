@@ -93,23 +93,47 @@ export const Timeline: React.FC<TimelineProps> = ({
   }
 
   useEffect(() => {
-    if (!timeLineContainerRef.current) return;
+    const container = timeLineContainerRef.current;
+    if (!container) return;
 
-    const timelineWrapperWidth = getTimelineWrapperWidth(
-      timeLineContainerRef.current.offsetWidth,
-      zoomLevelValue,
-    );
+    const updateZoomContext = () => {
+      const containerWidth = container.offsetWidth;
 
-    setZoomContextValue({
-      blockOffset: getBlockOffsetForZoomLevel(
+      // Avoid Infinity/NaN playhead positions when duration or layout width is not ready yet.
+      if (duration <= 0 || containerWidth <= 0) {
+        setZoomContextValue({
+          blockOffset: 0,
+          pixelsInSecond: 0,
+          timelineWrapperWidth: 0,
+        });
+        return;
+      }
+
+      const timelineWrapperWidth = getTimelineWrapperWidth(
+        containerWidth,
         zoomLevelValue,
-        duration,
+      );
+
+      setZoomContextValue({
+        blockOffset: getBlockOffsetForZoomLevel(
+          zoomLevelValue,
+          duration,
+          timelineWrapperWidth,
+        ),
+        pixelsInSecond: timelineWrapperWidth / duration,
         timelineWrapperWidth,
-      ),
-      pixelsInSecond: timelineWrapperWidth / duration,
-      timelineWrapperWidth: timelineWrapperWidth,
-    });
-  }, [timeLineContainerRef.current, zoomLevelValue, duration]);
+      });
+    };
+
+    updateZoomContext();
+
+    const resizeObserver = new ResizeObserver(updateZoomContext);
+    resizeObserver.observe(container);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [zoomLevelValue, duration]);
 
   useEffect(() => {
     const timeLineWrapper: HTMLElement = timeLineContainerRef.current!;
