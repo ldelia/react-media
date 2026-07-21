@@ -16,11 +16,15 @@ export const pixelToSeconds = (
 };
 
 export const getComputedElementWidth = (element: HTMLElement): number => {
-  const elementWidthCSSProperty: string = window
-    .getComputedStyle(element)
-    .getPropertyValue('width')
-    .replace(/[^-\d]/g, '');
-  return parseInt(elementWidthCSSProperty);
+  const offsetWidth = element.offsetWidth;
+  if (offsetWidth > 0) {
+    return offsetWidth;
+  }
+
+  const computedWidth = parseFloat(
+    window.getComputedStyle(element).getPropertyValue('width'),
+  );
+  return Number.isFinite(computedWidth) ? computedWidth : 0;
 };
 
 export const numberToPxString = (number: number): string => {
