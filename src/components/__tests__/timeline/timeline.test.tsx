@@ -122,7 +122,7 @@ describe('getComputedElementWidth', () => {
     vitest.spyOn(element, 'offsetWidth', 'get').mockReturnValue(0);
     vitest.spyOn(window, 'getComputedStyle').mockReturnValue({
       getPropertyValue: () => 'auto',
-    } as CSSStyleDeclaration);
+    } as unknown as CSSStyleDeclaration);
 
     expect(getComputedElementWidth(element)).toBe(0);
   });
