@@ -18,7 +18,7 @@ interface TrainingYouTubeProps extends BaseProps {
   videoId: string;
   mp3File?: never;
   initialVolume?: number; // between 0 and 100
-  onVideoUnavailable: () => void;
+  onVideoUnavailable: (errorCode?: number) => void;
   onMp3Unavailable?: never;
 }
 

@@ -1,11 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { InnerYouTubePlayerInterface } from '../models/Player/YouTubePlayer';
 import ReactPlayer from 'react-player/lazy';
+import {
+  extractYouTubeErrorCode,
+  isYouTubeUnavailableError,
+} from './youtubeUnavailableErrors';
 
 interface Props {
   videoId: string;
   onReady: (event: { target: InnerYouTubePlayerInterface }) => void;
-  onVideoUnavailable: () => void;
+  /** Called with the YouTube IFrame API error code when the video cannot be played. */
+  onVideoUnavailable: (errorCode?: number) => void;
 }
 export const YouTubeInnerPlayer = ({ videoId, onReady, onVideoUnavailable }: Props) => {
   const hasErrorRef = useRef(false);
@@ -24,21 +29,25 @@ export const YouTubeInnerPlayer = ({ videoId, onReady, onVideoUnavailable }: Pro
       if (!hasErrorRef.current) {
         onReady({ target: internalPlayer as InnerYouTubePlayerInterface });
       } else {
-        console.warn("YouTubeInnerPlayer onReady suppressed due to error");
+        console.warn('YouTubeInnerPlayer onReady suppressed due to error');
       }
     }, 300);
   };
 
-  const handleError = (error: any, data: any) => {
+  const handleError = (error: unknown, data?: unknown) => {
     hasErrorRef.current = true;
     if (readyTimeoutRef.current) {
       clearTimeout(readyTimeoutRef.current);
       readyTimeoutRef.current = null;
     }
-    if (error === 150) {
-      onVideoUnavailable();
+
+    const errorCode = extractYouTubeErrorCode(error, data);
+    if (errorCode !== undefined && isYouTubeUnavailableError(errorCode)) {
+      onVideoUnavailable(errorCode);
     } else {
-      console.warn('Unhandled YouTube error:', error);
+      console.warn('Unhandled YouTube error:', error, data);
+      // Still notify consumers — the video did not become playable.
+      onVideoUnavailable(errorCode);
     }
   };
 
