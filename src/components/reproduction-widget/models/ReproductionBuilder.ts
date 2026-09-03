@@ -2,11 +2,15 @@ import {
   InnerYouTubePlayerInterface,
   YouTubePlayer,
 } from './Player/YouTubePlayer';
-import { InnerMp3PlayerInterface, Mp3Player } from './Player/Mp3Player';
+import {
+  HtmlAudioPlayer,
+  InnerAudioPlayerInterface,
+  InnerMp3PlayerInterface,
+} from './Player/Mp3Player';
 import { PlayAlongPlayer } from './Player/PlayAlongPlayer';
 import { Reproduction } from './Reproduction';
 
-export type MediaType = 'youtube' | 'mp3' | 'playAlong';
+export type MediaType = 'youtube' | 'mp3' | 'audio' | 'playAlong';
 
 export class ReproductionBuilder {
   private mediaType: MediaType;
@@ -16,6 +20,7 @@ export class ReproductionBuilder {
   private volume: number; // between 0 and 100
   private innerPlayer:
     | InnerYouTubePlayerInterface
+    | InnerAudioPlayerInterface
     | InnerMp3PlayerInterface
     | string
     | null;
@@ -52,6 +57,7 @@ export class ReproductionBuilder {
   withInnerPlayer(
     innerPlayer:
       | InnerYouTubePlayerInterface
+      | InnerAudioPlayerInterface
       | InnerMp3PlayerInterface
       | string,
   ) {
@@ -81,7 +87,10 @@ export class ReproductionBuilder {
         );
         break;
       case 'mp3':
-        player = new Mp3Player(this.innerPlayer as InnerMp3PlayerInterface);
+      case 'audio':
+        player = new HtmlAudioPlayer(
+          this.innerPlayer as InnerAudioPlayerInterface,
+        );
         break;
       case 'playAlong':
         if (this.songDuration === null) {

@@ -1,4 +1,4 @@
-import { Mp3Player } from '../../reproduction-widget/models/Player/Mp3Player';
+import { HtmlAudioPlayer, Mp3Player } from '../../reproduction-widget/models/Player/Mp3Player';
 import { PLAYER_EVENTS } from '../../reproduction-widget/models/Player/PlayerEvents';
 
 type Listener = EventListenerOrEventListenerObject;
@@ -38,7 +38,12 @@ function createFakeAudioElement(
   return fake;
 }
 
-describe('Mp3Player', () => {
+describe('HtmlAudioPlayer', () => {
+  it('is available under the Mp3Player alias', () => {
+    const audio = createFakeAudioElement();
+    expect(new Mp3Player(audio)).toBeInstanceOf(HtmlAudioPlayer);
+  });
+
   it('plays and pauses the inner audio element', () => {
     const audio = createFakeAudioElement();
     const player = new Mp3Player(audio);

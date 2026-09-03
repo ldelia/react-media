@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { getAudioMimeTypeFromUrl } from './getAudioMimeType';
 
 interface Props {
   mp3File: string;
@@ -14,6 +15,7 @@ export const Mp3InnerPlayer = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasErrorRef = useRef(false);
   const readyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioMimeType = getAudioMimeTypeFromUrl(mp3File);
 
   /**
    * When the audio is unavailable, the player may throw both the onError and
@@ -57,11 +59,12 @@ export const Mp3InnerPlayer = ({
   return (
     <audio
       ref={audioRef}
-      src={mp3File}
       preload="auto"
       style={{ display: 'none' }}
       onLoadedMetadata={handleLoadedMetadata}
       onError={handleError}
-    />
+    >
+      <source src={mp3File} type={audioMimeType} />
+    </audio>
   );
 };

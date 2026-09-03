@@ -26,9 +26,11 @@ interface TrainingMp3Props extends BaseProps {
   trainingMode: true;
   duration?: never;
   videoId?: never;
+  /** HTML audio URL (MP3, M4A, or any format playable by the browser). */
   mp3File: string;
   initialVolume?: number; // between 0 and 100
   onVideoUnavailable?: never;
+  /** Fired when the audio file fails to load or is unavailable. */
   onMp3Unavailable: () => void;
 }
 
