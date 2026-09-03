@@ -1,6 +1,6 @@
 import { PLAYER_EVENTS } from './PlayerEvents';
 
-export type InnerMp3PlayerInterface = HTMLAudioElement;
+export type InnerAudioPlayerInterface = HTMLAudioElement;
 
 /**
  * HTMLAudioElement.playbackRate accepts continuous values.
@@ -13,16 +13,16 @@ const dispatchOnPlayingHandlers = Symbol();
 const dispatchOnFinishHandlers = Symbol();
 const dispatchOnErrorHandlers = Symbol();
 
-export class Mp3Player {
+export class HtmlAudioPlayer {
   private currentTime: number;
   private isRunning: boolean;
   private volume: number = 50; // between 0 and 100
-  private innerPlayer: InnerMp3PlayerInterface;
+  private innerPlayer: InnerAudioPlayerInterface;
   private [dispatchOnPlayingHandlers]: (() => void)[];
   private [dispatchOnFinishHandlers]: (() => void)[];
   private [dispatchOnErrorHandlers]: ((error?: any) => void)[];
 
-  constructor(innerPlayer: InnerMp3PlayerInterface) {
+  constructor(innerPlayer: InnerAudioPlayerInterface) {
     this[dispatchOnFinishHandlers] = [];
     this[dispatchOnPlayingHandlers] = [];
     this[dispatchOnErrorHandlers] = [];
@@ -33,24 +33,24 @@ export class Mp3Player {
 
     this.innerPlayer.addEventListener('playing', () => {
       this.isRunning = true;
-      this.dispatch(Mp3Player.EVENTS.PLAYING);
+      this.dispatch(HtmlAudioPlayer.EVENTS.PLAYING);
     });
 
     this.innerPlayer.addEventListener('ended', () => {
       this.isRunning = false;
       this.currentTime = 0;
-      this.dispatch(Mp3Player.EVENTS.FINISH);
+      this.dispatch(HtmlAudioPlayer.EVENTS.FINISH);
     });
 
     this.innerPlayer.addEventListener('pause', () => {
       this.isRunning = false;
       this.currentTime = this.innerPlayer.currentTime;
-      this.dispatch(Mp3Player.EVENTS.PAUSED);
+      this.dispatch(HtmlAudioPlayer.EVENTS.PAUSED);
     });
 
     this.innerPlayer.addEventListener('error', () => {
       this.isRunning = false;
-      this.dispatch(Mp3Player.EVENTS.ERROR, {
+      this.dispatch(HtmlAudioPlayer.EVENTS.ERROR, {
         message: 'Audio playback error',
       });
     });
@@ -107,7 +107,7 @@ export class Mp3Player {
   }
 
   /**
-   * Returns an empty array to signal that MP3 supports continuous playback
+   * Returns an empty array to signal that HTML audio supports continuous playback
    * rates (any value between {@link MIN_PLAYBACK_RATE} and {@link MAX_PLAYBACK_RATE}),
    * unlike YouTube which only allows a discrete set.
    */
@@ -122,7 +122,7 @@ export class Mp3Player {
       playbackRate > MAX_PLAYBACK_RATE
     ) {
       throw new Error(
-        `The Mp3Player doesn't support a playbackRate with value ${playbackRate}. ` +
+        `The HtmlAudioPlayer doesn't support a playbackRate with value ${playbackRate}. ` +
           `Expected a number between ${MIN_PLAYBACK_RATE} and ${MAX_PLAYBACK_RATE}.`,
       );
     }
@@ -134,35 +134,35 @@ export class Mp3Player {
   }
 
   on(
-    eventName: keyof typeof Mp3Player.EVENTS,
+    eventName: keyof typeof HtmlAudioPlayer.EVENTS,
     handler: (error?: any) => void,
   ) {
     switch (eventName) {
-      case Mp3Player.EVENTS.PLAYING:
+      case HtmlAudioPlayer.EVENTS.PLAYING:
         return this[dispatchOnPlayingHandlers].push(handler);
-      case Mp3Player.EVENTS.FINISH:
+      case HtmlAudioPlayer.EVENTS.FINISH:
         return this[dispatchOnFinishHandlers].push(handler);
-      case Mp3Player.EVENTS.ERROR:
+      case HtmlAudioPlayer.EVENTS.ERROR:
         return this[dispatchOnErrorHandlers].push(handler);
       default:
         break;
     }
   }
 
-  dispatch(eventName: keyof typeof Mp3Player.EVENTS, error?: any) {
+  dispatch(eventName: keyof typeof HtmlAudioPlayer.EVENTS, error?: any) {
     let handler: (error?: any) => void;
     let i: number;
     let len: number;
     let ref: ((error?: any) => void)[] = [];
 
     switch (eventName) {
-      case Mp3Player.EVENTS.PLAYING:
+      case HtmlAudioPlayer.EVENTS.PLAYING:
         ref = this[dispatchOnPlayingHandlers];
         break;
-      case Mp3Player.EVENTS.FINISH:
+      case HtmlAudioPlayer.EVENTS.FINISH:
         ref = this[dispatchOnFinishHandlers];
         break;
-      case Mp3Player.EVENTS.ERROR:
+      case HtmlAudioPlayer.EVENTS.ERROR:
         ref = this[dispatchOnErrorHandlers];
         break;
       default:
@@ -175,3 +175,9 @@ export class Mp3Player {
     }
   }
 }
+
+/** @deprecated Use {@link HtmlAudioPlayer} */
+export const Mp3Player = HtmlAudioPlayer;
+
+/** @deprecated Use {@link InnerAudioPlayerInterface} */
+export type InnerMp3PlayerInterface = InnerAudioPlayerInterface;

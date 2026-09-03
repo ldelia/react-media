@@ -226,3 +226,12 @@ InvalidMp3.args = {
   songTempo: 180,
   onMp3Unavailable: () => console.error('MP3 unavailable'),
 };
+
+export const M4a = Template.bind({});
+M4a.args = {
+  trainingMode: true,
+  mp3File:
+    'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.m4a',
+  songTempo: 180,
+  onMp3Unavailable: () => console.error('Audio unavailable'),
+};
