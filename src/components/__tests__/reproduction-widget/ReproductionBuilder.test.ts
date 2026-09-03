@@ -1,4 +1,4 @@
-import { HtmlAudioPlayer } from '../../reproduction-widget/models/Player/Mp3Player';
+import { HtmlAudioPlayer } from '../../reproduction-widget/models/Player/HtmlAudioPlayer';
 import { Reproduction } from '../../reproduction-widget/models/Reproduction';
 
 function createFakeAudioElement(): HTMLAudioElement {
@@ -15,22 +15,11 @@ function createFakeAudioElement(): HTMLAudioElement {
 }
 
 describe('ReproductionBuilder', () => {
-  it('creates an HtmlAudioPlayer for the audio media type alias', () => {
+  it('creates an HtmlAudioPlayer for the audio media type', () => {
     const audio = createFakeAudioElement();
 
     const reproduction = Reproduction.newBuilder()
       .withMediaType('audio')
-      .withInnerPlayer(audio)
-      .createReproduction();
-
-    expect(reproduction.getPlayer()).toBeInstanceOf(HtmlAudioPlayer);
-  });
-
-  it('creates an HtmlAudioPlayer for the mp3 media type', () => {
-    const audio = createFakeAudioElement();
-
-    const reproduction = Reproduction.newBuilder()
-      .withMediaType('mp3')
       .withInnerPlayer(audio)
       .createReproduction();
 

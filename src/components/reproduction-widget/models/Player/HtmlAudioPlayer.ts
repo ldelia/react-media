@@ -175,9 +175,3 @@ export class HtmlAudioPlayer {
     }
   }
 }
-
-/** @deprecated Use {@link HtmlAudioPlayer} */
-export const Mp3Player = HtmlAudioPlayer;
-
-/** @deprecated Use {@link InnerAudioPlayerInterface} */
-export type InnerMp3PlayerInterface = InnerAudioPlayerInterface;

@@ -2,20 +2,20 @@ import React, { useEffect, useRef } from 'react';
 import { getAudioMimeTypeFromUrl } from './getAudioMimeType';
 
 interface Props {
-  mp3File: string;
+  audioFile: string;
   onReady: (event: { target: HTMLAudioElement }) => void;
-  onMp3Unavailable: () => void;
+  onAudioUnavailable: () => void;
 }
 
-export const Mp3InnerPlayer = ({
-  mp3File,
+export const AudioInnerPlayer = ({
+  audioFile,
   onReady,
-  onMp3Unavailable,
+  onAudioUnavailable,
 }: Props) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasErrorRef = useRef(false);
   const readyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const audioMimeType = getAudioMimeTypeFromUrl(mp3File);
+  const audioMimeType = getAudioMimeTypeFromUrl(audioFile);
 
   /**
    * When the audio is unavailable, the player may throw both the onError and
@@ -27,7 +27,7 @@ export const Mp3InnerPlayer = ({
       if (!hasErrorRef.current && audioRef.current) {
         onReady({ target: audioRef.current });
       } else {
-        console.warn('Mp3InnerPlayer onReady suppressed due to error');
+        console.warn('AudioInnerPlayer onReady suppressed due to error');
       }
     }, 300);
   };
@@ -38,7 +38,7 @@ export const Mp3InnerPlayer = ({
       clearTimeout(readyTimeoutRef.current);
       readyTimeoutRef.current = null;
     }
-    onMp3Unavailable();
+    onAudioUnavailable();
   };
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export const Mp3InnerPlayer = ({
         readyTimeoutRef.current = null;
       }
     };
-  }, [mp3File]);
+  }, [audioFile]);
 
   return (
     <audio
@@ -64,7 +64,7 @@ export const Mp3InnerPlayer = ({
       onLoadedMetadata={handleLoadedMetadata}
       onError={handleError}
     >
-      <source src={mp3File} type={audioMimeType} />
+      <source src={audioFile} type={audioMimeType} />
     </audio>
   );
 };

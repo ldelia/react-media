@@ -5,12 +5,11 @@ import {
 import {
   HtmlAudioPlayer,
   InnerAudioPlayerInterface,
-  InnerMp3PlayerInterface,
-} from './Player/Mp3Player';
+} from './Player/HtmlAudioPlayer';
 import { PlayAlongPlayer } from './Player/PlayAlongPlayer';
 import { Reproduction } from './Reproduction';
 
-export type MediaType = 'youtube' | 'mp3' | 'audio' | 'playAlong';
+export type MediaType = 'youtube' | 'audio' | 'playAlong';
 
 export class ReproductionBuilder {
   private mediaType: MediaType;
@@ -21,7 +20,6 @@ export class ReproductionBuilder {
   private innerPlayer:
     | InnerYouTubePlayerInterface
     | InnerAudioPlayerInterface
-    | InnerMp3PlayerInterface
     | string
     | null;
 
@@ -58,7 +56,6 @@ export class ReproductionBuilder {
     innerPlayer:
       | InnerYouTubePlayerInterface
       | InnerAudioPlayerInterface
-      | InnerMp3PlayerInterface
       | string,
   ) {
     this.innerPlayer = innerPlayer;
@@ -86,7 +83,6 @@ export class ReproductionBuilder {
           this.innerPlayer as InnerYouTubePlayerInterface,
         );
         break;
-      case 'mp3':
       case 'audio':
         player = new HtmlAudioPlayer(
           this.innerPlayer as InnerAudioPlayerInterface,
