@@ -2,7 +2,7 @@ import { PLAYER_EVENTS } from './Player/PlayerEvents';
 import { ReproductionBuilder } from './ReproductionBuilder';
 import { PlayAlongPlayer } from './Player/PlayAlongPlayer';
 import { YouTubePlayer } from './Player/YouTubePlayer';
-import { HtmlAudioPlayer } from './Player/Mp3Player';
+import { HtmlAudioPlayer } from './Player/HtmlAudioPlayer';
 
 type Player = PlayAlongPlayer | YouTubePlayer | HtmlAudioPlayer;
 

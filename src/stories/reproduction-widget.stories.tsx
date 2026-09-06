@@ -211,27 +211,27 @@ InvalidVideo.args = {
   onVideoUnavailable: () => console.error('Video unavailable'),
 };
 
-export const Mp3 = Template.bind({});
-Mp3.args = {
+export const Audio = Template.bind({});
+Audio.args = {
   trainingMode: true,
-  mp3File: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+  audioFile: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
   songTempo: 180,
-  onMp3Unavailable: () => console.error('MP3 unavailable'),
+  onAudioUnavailable: () => console.error('Audio unavailable'),
 };
 
-export const InvalidMp3 = Template.bind({});
-InvalidMp3.args = {
+export const InvalidAudio = Template.bind({});
+InvalidAudio.args = {
   trainingMode: true,
-  mp3File: 'https://example.com/invalid-audio-file.mp3',
+  audioFile: 'https://example.com/invalid-audio-file.mp3',
   songTempo: 180,
-  onMp3Unavailable: () => console.error('MP3 unavailable'),
+  onAudioUnavailable: () => console.error('Audio unavailable'),
 };
 
 export const M4a = Template.bind({});
 M4a.args = {
   trainingMode: true,
-  mp3File:
+  audioFile:
     'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.m4a',
   songTempo: 180,
-  onMp3Unavailable: () => console.error('Audio unavailable'),
+  onAudioUnavailable: () => console.error('Audio unavailable'),
 };

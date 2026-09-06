@@ -1,4 +1,4 @@
-import { HtmlAudioPlayer, Mp3Player } from '../../reproduction-widget/models/Player/Mp3Player';
+import { HtmlAudioPlayer } from '../../reproduction-widget/models/Player/HtmlAudioPlayer';
 import { PLAYER_EVENTS } from '../../reproduction-widget/models/Player/PlayerEvents';
 
 type Listener = EventListenerOrEventListenerObject;
@@ -39,14 +39,9 @@ function createFakeAudioElement(
 }
 
 describe('HtmlAudioPlayer', () => {
-  it('is available under the Mp3Player alias', () => {
-    const audio = createFakeAudioElement();
-    expect(new Mp3Player(audio)).toBeInstanceOf(HtmlAudioPlayer);
-  });
-
   it('plays and pauses the inner audio element', () => {
     const audio = createFakeAudioElement();
-    const player = new Mp3Player(audio);
+    const player = new HtmlAudioPlayer(audio);
 
     player.play();
     expect(audio.play).toHaveBeenCalled();
@@ -57,7 +52,7 @@ describe('HtmlAudioPlayer', () => {
 
   it('stops by pausing and seeking to the start', () => {
     const audio = createFakeAudioElement({ currentTime: 30 });
-    const player = new Mp3Player(audio);
+    const player = new HtmlAudioPlayer(audio);
 
     player.stop();
 
@@ -68,7 +63,7 @@ describe('HtmlAudioPlayer', () => {
 
   it('seeks to a given time', () => {
     const audio = createFakeAudioElement();
-    const player = new Mp3Player(audio);
+    const player = new HtmlAudioPlayer(audio);
 
     player.seekTo(45);
 
@@ -78,7 +73,7 @@ describe('HtmlAudioPlayer', () => {
 
   it('converts volume from 0-100 to 0-1 on the audio element', () => {
     const audio = createFakeAudioElement();
-    const player = new Mp3Player(audio);
+    const player = new HtmlAudioPlayer(audio);
 
     player.setVolume(75);
 
@@ -88,7 +83,7 @@ describe('HtmlAudioPlayer', () => {
 
   it('returns duration from the audio element when available', () => {
     const audio = createFakeAudioElement({ duration: 200 });
-    const player = new Mp3Player(audio);
+    const player = new HtmlAudioPlayer(audio);
 
     expect(player.getDuration()).toBe(200);
     expect(player.isAvailable()).toBe(true);
@@ -96,9 +91,8 @@ describe('HtmlAudioPlayer', () => {
 
   it('supports continuous playback rates within 0.25–4', () => {
     const audio = createFakeAudioElement();
-    const player = new Mp3Player(audio);
+    const player = new HtmlAudioPlayer(audio);
 
-    // Empty list signals continuous rates (unlike YouTube's discrete set)
     expect(player.getAvailablePlaybackRates()).toEqual([]);
 
     player.setPlaybackRate(0.85);
@@ -117,7 +111,7 @@ describe('HtmlAudioPlayer', () => {
 
   it('dispatches PLAYING, FINISH and ERROR events from native audio events', async () => {
     const audio = createFakeAudioElement();
-    const player = new Mp3Player(audio);
+    const player = new HtmlAudioPlayer(audio);
 
     const onPlaying = vitest.fn();
     const onFinish = vitest.fn();

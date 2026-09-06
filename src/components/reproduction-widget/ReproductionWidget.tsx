@@ -1,7 +1,7 @@
 import React from 'react';
 import { YouTubeInnerPlayer } from './inner-players/YouTubeInnerPlayer';
 import { PlayAlongInnerPlayer } from './inner-players/PlayAlongInnerPlayer';
-import { Mp3InnerPlayer } from './inner-players/Mp3InnerPlayer';
+import { AudioInnerPlayer } from './inner-players/AudioInnerPlayer';
 import { Reproduction } from './models/Reproduction';
 import { InnerYouTubePlayerInterface } from './models/Player/YouTubePlayer';
 
@@ -16,50 +16,50 @@ interface TrainingYouTubeProps extends BaseProps {
   trainingMode: true;
   duration?: never;
   videoId: string;
-  mp3File?: never;
+  audioFile?: never;
   initialVolume?: number; // between 0 and 100
   onVideoUnavailable: (errorCode?: number) => void;
-  onMp3Unavailable?: never;
+  onAudioUnavailable?: never;
 }
 
-interface TrainingMp3Props extends BaseProps {
+interface TrainingAudioProps extends BaseProps {
   trainingMode: true;
   duration?: never;
   videoId?: never;
-  /** HTML audio URL (MP3, M4A, or any format playable by the browser). */
-  mp3File: string;
+  /** HTML audio URL (any format playable by the browser). */
+  audioFile: string;
   initialVolume?: number; // between 0 and 100
   onVideoUnavailable?: never;
   /** Fired when the audio file fails to load or is unavailable. */
-  onMp3Unavailable: () => void;
+  onAudioUnavailable: () => void;
 }
 
 interface NonTrainingProps extends BaseProps {
   trainingMode: false;
   duration: number;
   videoId?: never;
-  mp3File?: never;
+  audioFile?: never;
   initialVolume?: never;
   onVideoUnavailable?: never;
-  onMp3Unavailable?: never;
+  onAudioUnavailable?: never;
 }
 
 export type ReproductionWidgetProps =
   | TrainingYouTubeProps
-  | TrainingMp3Props
+  | TrainingAudioProps
   | NonTrainingProps;
 
 export const ReproductionWidget = ({
   trainingMode,
   duration,
   videoId,
-  mp3File,
+  audioFile,
   initialVolume = 50,
   withCountingIn = true,
   songTempo = 0,
   onInit,
   onVideoUnavailable,
-  onMp3Unavailable,
+  onAudioUnavailable,
 }: ReproductionWidgetProps) => {
   function onPlayAlongInnerPlayerReadyHandler(event: { target: string }) {
     const newReproduction = Reproduction.newBuilder()
@@ -85,9 +85,9 @@ export const ReproductionWidget = ({
     onInit(newReproduction);
   }
 
-  function onMp3InnerPlayerReadyHandler(event: { target: HTMLAudioElement }) {
+  function onAudioInnerPlayerReadyHandler(event: { target: HTMLAudioElement }) {
     const newReproduction = Reproduction.newBuilder()
-      .withMediaType('mp3')
+      .withMediaType('audio')
       .withSongTempo(songTempo)
       .withCountingIn(withCountingIn && songTempo > 0)
       .withInnerPlayer(event.target)
@@ -99,11 +99,11 @@ export const ReproductionWidget = ({
   return (
     <>
       {trainingMode ? (
-        mp3File ? (
-          <Mp3InnerPlayer
-            mp3File={mp3File}
-            onReady={onMp3InnerPlayerReadyHandler}
-            onMp3Unavailable={onMp3Unavailable}
+        audioFile ? (
+          <AudioInnerPlayer
+            audioFile={audioFile}
+            onReady={onAudioInnerPlayerReadyHandler}
+            onAudioUnavailable={onAudioUnavailable}
           />
         ) : (
           <YouTubeInnerPlayer

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { Mp3InnerPlayer } from '../../reproduction-widget/inner-players/Mp3InnerPlayer';
+import { AudioInnerPlayer } from '../../reproduction-widget/inner-players/AudioInnerPlayer';
 
-describe('Mp3InnerPlayer', () => {
+describe('AudioInnerPlayer', () => {
   beforeEach(() => {
     vitest.useFakeTimers();
   });
@@ -13,13 +13,13 @@ describe('Mp3InnerPlayer', () => {
 
   it('calls onReady with the audio element after loadedmetadata', () => {
     const onReady = vitest.fn();
-    const onMp3Unavailable = vitest.fn();
+    const onAudioUnavailable = vitest.fn();
 
     const { container } = render(
-      <Mp3InnerPlayer
-        mp3File="https://example.com/song.mp3"
+      <AudioInnerPlayer
+        audioFile="https://example.com/song.mp3"
         onReady={onReady}
-        onMp3Unavailable={onMp3Unavailable}
+        onAudioUnavailable={onAudioUnavailable}
       />,
     );
 
@@ -35,18 +35,18 @@ describe('Mp3InnerPlayer', () => {
 
     expect(onReady).toHaveBeenCalledTimes(1);
     expect(onReady).toHaveBeenCalledWith({ target: audio });
-    expect(onMp3Unavailable).not.toHaveBeenCalled();
+    expect(onAudioUnavailable).not.toHaveBeenCalled();
   });
 
   it('sets audio/mp4 type for m4a URLs', () => {
     const onReady = vitest.fn();
-    const onMp3Unavailable = vitest.fn();
+    const onAudioUnavailable = vitest.fn();
 
     const { container } = render(
-      <Mp3InnerPlayer
-        mp3File="https://example.com/song.m4a"
+      <AudioInnerPlayer
+        audioFile="https://example.com/song.m4a"
         onReady={onReady}
-        onMp3Unavailable={onMp3Unavailable}
+        onAudioUnavailable={onAudioUnavailable}
       />,
     );
 
@@ -60,10 +60,10 @@ describe('Mp3InnerPlayer', () => {
 
   it('omits type for unknown extensions', () => {
     const { container } = render(
-      <Mp3InnerPlayer
-        mp3File="https://example.com/song"
+      <AudioInnerPlayer
+        audioFile="https://example.com/song"
         onReady={vitest.fn()}
-        onMp3Unavailable={vitest.fn()}
+        onAudioUnavailable={vitest.fn()}
       />,
     );
 
@@ -71,15 +71,15 @@ describe('Mp3InnerPlayer', () => {
     expect(source.getAttribute('type')).toBeNull();
   });
 
-  it('calls onMp3Unavailable on error and suppresses onReady', () => {
+  it('calls onAudioUnavailable on error and suppresses onReady', () => {
     const onReady = vitest.fn();
-    const onMp3Unavailable = vitest.fn();
+    const onAudioUnavailable = vitest.fn();
 
     const { container } = render(
-      <Mp3InnerPlayer
-        mp3File="https://example.com/missing.mp3"
+      <AudioInnerPlayer
+        audioFile="https://example.com/missing.mp3"
         onReady={onReady}
-        onMp3Unavailable={onMp3Unavailable}
+        onAudioUnavailable={onAudioUnavailable}
       />,
     );
 
@@ -89,19 +89,19 @@ describe('Mp3InnerPlayer', () => {
     fireEvent.loadedMetadata(audio);
     vitest.advanceTimersByTime(300);
 
-    expect(onMp3Unavailable).toHaveBeenCalledTimes(1);
+    expect(onAudioUnavailable).toHaveBeenCalledTimes(1);
     expect(onReady).not.toHaveBeenCalled();
   });
 
   it('does not call onReady after unmount while the ready timeout is pending', () => {
     const onReady = vitest.fn();
-    const onMp3Unavailable = vitest.fn();
+    const onAudioUnavailable = vitest.fn();
 
     const { container, unmount } = render(
-      <Mp3InnerPlayer
-        mp3File="https://example.com/song.mp3"
+      <AudioInnerPlayer
+        audioFile="https://example.com/song.mp3"
         onReady={onReady}
-        onMp3Unavailable={onMp3Unavailable}
+        onAudioUnavailable={onAudioUnavailable}
       />,
     );
 
