@@ -28,6 +28,15 @@ const EVENTS = {
 
 type Handler = (args: object) => void;
 
+/** Half-open loop window [from, to). */
+function isOutsideLoopRange(
+  currentTime: number,
+  from: number,
+  to: number,
+): boolean {
+  return currentTime < from || currentTime >= to;
+}
+
 const dispatchOnSongStartHandlers = Symbol();
 const dispatchOnCountingInHandlers = Symbol();
 const dispatchOnPlayHandlers = Symbol();
@@ -261,7 +270,11 @@ export class Reproduction {
     clearInterval(this.loopInterval as NodeJS.Timeout);
     this.loopInterval = null;
 
-    this.seekTo(from);
+    const currentTime = this.getCurrentTime();
+    if (isOutsideLoopRange(currentTime, from, to)) {
+      this.seekTo(from);
+    }
+
     this.play();
 
     const loopCheckInterval = 100;
@@ -362,7 +375,7 @@ export class Reproduction {
 
     if (this.loopInterval && this.isPlaying()) {
       const currentTime = this.getCurrentTime();
-      if (currentTime < from || currentTime >= to) {
+      if (isOutsideLoopRange(currentTime, from, to)) {
         this.seekTo(from);
       }
     }
